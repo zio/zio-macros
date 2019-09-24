@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package zio.macros.mock
+package zio.macros.access
 
-import zio.ZIO
-import zio.test.mock.Method
+import zio.{URIO, ZIO}
 
-@Mockable
+@Accessable
 trait Sys {
 
   val sys: Sys.Service[Any]
@@ -42,15 +41,15 @@ object Sys {
   val postValue: Int = 42
 }
 
-object ValidateMockable {
+object ValidateAccessable {
   // if macro expands correctly code below should compile
-  val get: Method[Int, String]                  = Sys.Service.Get
-  val set: Method[(Int, String), Unit]          = Sys.Service.Set
-  val getAndSet: Method[(Int, String), String]  = Sys.Service.GetAndSet
-  val getAndSet2: Method[(Int, String), String] = Sys.Service.GetAndSet2
-  val clear: Method[Nothing, Unit]              = Sys.Service.Clear
-  val clear2: Method[Nothing, Unit]             = Sys.Service.Clear2
-  val clear3: Method[Nothing, Unit]             = Sys.Service.Clear3
+  def get(id: Int): URIO[Sys, String]                       = Sys.>.get(id)
+  def set(id: Int, value: String): URIO[Sys, Unit]          = Sys.>.set(id, value)
+  def getAndSet(id: Int, value: String): URIO[Sys, String]  = Sys.>.getAndSet(id, value)
+  def getAndSet2(id: Int)(value: String): URIO[Sys, String] = Sys.>.getAndSet2(id)(value)
+  def clear(): URIO[Sys, Unit]                              = Sys.>.clear()
+  def clear2: URIO[Sys, Unit]                               = Sys.>.clear2
+  val clear3: URIO[Sys, Unit]                               = Sys.>.clear3
 
   val preValue: Int  = Sys.preValue
   val postValue: Int = Sys.postValue

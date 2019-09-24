@@ -43,12 +43,40 @@ lazy val root = project
     skip in publish := true
   )
   .aggregate(
+    access.jvm,
+    access.js,
+    accessExamples.jvm,
+    accessExamples.js,
     mock.jvm,
     mock.js,
     mockExamples.jvm,
     mockExamples.js
   )
   .enablePlugins(ScalaJSPlugin)
+
+lazy val access = crossProject(JSPlatform, JVMPlatform)
+  .in(file("access"))
+  .settings(stdSettings("zio-macros-access"))
+  .settings(
+    scalacOptions --= Seq("-deprecation", "-Xfatal-warnings")
+  )
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scala-lang" %  "scala-reflect"  % scalaVersion.value % "provided",
+      "org.scala-lang" %  "scala-compiler" % scalaVersion.value % "provided"
+    )
+  )
+
+lazy val accessExamples = crossProject(JSPlatform, JVMPlatform)
+  .in(file("access-examples"))
+  .dependsOn(access)
+  .settings(stdSettings("zio-macros-access-examples"))
+  .settings(
+    skip in publish := true,
+    libraryDependencies ++= Seq(
+      "dev.zio" %% "zio" % "1.0.0-RC12-1+121-67be0f99+20190922-1210"
+    )
+  )
 
 lazy val mock = crossProject(JSPlatform, JVMPlatform)
   .in(file("mock"))
