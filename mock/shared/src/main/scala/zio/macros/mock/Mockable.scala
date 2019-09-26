@@ -85,6 +85,8 @@ private[mock] class MockableMacro(val c: Context) {
     annottees match {
       case (module: ClassDef) :: (companion: ModuleDef) :: Nil if module.name.toTermName == companion.name  =>
         TreesSummary(module, companion)
+      case (companion: ModuleDef) :: (module: ClassDef) :: Nil if module.name.toTermName == companion.name  =>
+        TreesSummary(module, companion)
       case _ => abort("Module trait and companion object pair not found")
     }
 
@@ -141,13 +143,13 @@ private[mock] class MockableMacro(val c: Context) {
             tq"(..$typeParams)"
         }
         val outputType = returns.args.last
-        Some(q"case object $tagName extends zio.test.mock.Method[$inputType, $outputType]")
+        Some(q"case object $tagName extends _root_.zio.test.mock.Method[$inputType, $outputType]")
 
       case ValDef(_, termName, returns: AppliedTypeTree, _) if isZIO(returns) =>
         val tagName = TermName(termName.toString.capitalize)
         val inputType = tq"Nothing"
         val outputType = returns.args.last
-        Some(q"case object $tagName extends zio.test.mock.Method[$inputType, $outputType]")
+        Some(q"case object $tagName extends _root_.zio.test.mock.Method[$inputType, $outputType]")
 
       case _ => None
     }
@@ -157,27 +159,19 @@ private[mock] class MockableMacro(val c: Context) {
 
       case DefDef(_, termName, _, argLists, returns: AppliedTypeTree, _) if isZIO(returns) =>
         val tagName = TermName(termName.toString.capitalize)
-        val (e :: a :: Nil) = returns.args.tail
         argLists.flatten match {
 
           case Nil =>
-            Some(q"def $termName(...$argLists): zio.IO[$e, $a] = mock.invoke0(Service.$tagName).asInstanceOf[zio.IO[$e, $a]]")
-
-          case arg :: Nil =>
-            val argName = arg.name
-            Some(q"def $termName(...$argLists): zio.IO[$e, $a] = mock.invoke1(Service.$tagName)($argName).asInstanceOf[zio.IO[$e, $a]]")
+            Some(q"def $termName(...$argLists) = mock(Service.$tagName)")
 
           case args =>
-            val argsSize = args.size
-            val invoke   = TermName(s"invoke$argsSize")
             val argNames = args.map(_.name)
-            Some(q"def $termName(...$argLists): zio.IO[$e, $a] = mock.$invoke(Service.$tagName)(..$argNames).asInstanceOf[zio.IO[$e, $a]]")
+            Some(q"def $termName(...$argLists) = mock(Service.$tagName)(..$argNames)")
         }
 
       case ValDef(_, termName, returns: AppliedTypeTree, _) if isZIO(returns) =>
         val name = TermName(termName.toString.capitalize)
-        val (e :: a :: Nil) = returns.args.tail
-        Some(q"val $termName: zio.IO[$e, $a] = mock.invoke0(Service.$name).asInstanceOf[zio.IO[$e, $a]]")
+        Some(q"val $termName = mock(Service.$name)")
 
       case _ => None
     }
@@ -196,7 +190,7 @@ private[mock] class MockableMacro(val c: Context) {
          ..$capabilityTags
        }
 
-      implicit val mockable: zio.test.mock.Mockable[${module.name}] = (mock: zio.test.mock.Mock) =>
+      implicit val mockable: _root_.zio.test.mock.Mockable[${module.name}] = (mock: _root_.zio.test.mock.Mock) =>
         new ${module.name} {
           val ${module.serviceName} = new Service[Any] {
             ..$capabilityMocks

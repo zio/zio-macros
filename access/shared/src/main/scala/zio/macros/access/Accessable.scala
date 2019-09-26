@@ -84,6 +84,8 @@ private[access] class AccessableMacro(val c: Context) {
     annottees match {
       case (module: ClassDef) :: (companion: ModuleDef) :: Nil if module.name.toTermName == companion.name  =>
         TreesSummary(module, companion)
+      case (companion: ModuleDef) :: (module: ClassDef) :: Nil if module.name.toTermName == companion.name  =>
+        TreesSummary(module, companion)
       case _ => abort("Module trait and companion object pair not found")
     }
 
@@ -134,17 +136,17 @@ private[access] class AccessableMacro(val c: Context) {
         argLists.flatten match {
 
           case Nil =>
-            Some(q"def $termName(...$argLists) = zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))")
+            Some(q"def $termName(...$argLists) = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))")
 
           case arg :: Nil =>
-            Some(q"def $termName(...$argLists) = zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))")
+            Some(q"def $termName(...$argLists) = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))")
 
           case args =>
-            Some(q"def $termName(...$argLists) = zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))")
+            Some(q"def $termName(...$argLists) = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))")
         }
 
       case ValDef(_, termName, returns: AppliedTypeTree, _) if isZIO(returns) =>
-        Some(q"val $termName = zio.ZIO.accessM(_.${module.serviceName}.$termName)")
+        Some(q"val $termName = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName)")
 
       case _ => None
     }
