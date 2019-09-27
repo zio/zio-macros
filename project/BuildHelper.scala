@@ -10,7 +10,6 @@ object BuildHelper {
 
   private val stdOptions = Seq(
     "-Xfatal-warnings",
-    "-Ymacro-debug-lite",
     "-language:higherKinds",
     "-language:existentials",
     "-explaintypes",

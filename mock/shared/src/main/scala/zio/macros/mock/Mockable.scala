@@ -159,19 +159,21 @@ private[mock] class MockableMacro(val c: Context) {
 
       case DefDef(_, termName, _, argLists, returns: AppliedTypeTree, _) if isZIO(returns) =>
         val tagName = TermName(termName.toString.capitalize)
+        val (e :: a :: Nil) = returns.args.tail
         argLists.flatten match {
 
           case Nil =>
-            Some(q"def $termName(...$argLists) = mock(Service.$tagName)")
+            Some(q"def $termName(...$argLists): _root_.zio.IO[$e, $a] = mock(Service.$tagName)")
 
           case args =>
             val argNames = args.map(_.name)
-            Some(q"def $termName(...$argLists) = mock(Service.$tagName)(..$argNames)")
+            Some(q"def $termName(...$argLists): _root_.zio.IO[$e, $a] = mock(Service.$tagName)(..$argNames)")
         }
 
       case ValDef(_, termName, returns: AppliedTypeTree, _) if isZIO(returns) =>
         val name = TermName(termName.toString.capitalize)
-        Some(q"val $termName = mock(Service.$name)")
+        val (e :: a :: Nil) = returns.args.tail
+        Some(q"val $termName: _root_.zio.IO[$e, $a] = mock(Service.$name)")
 
       case _ => None
     }
