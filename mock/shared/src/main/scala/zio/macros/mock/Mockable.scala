@@ -133,7 +133,6 @@ private[mock] class MockableMacro(val c: Context) {
     service.body.flatMap {
 
       case DefDef(_, termName, _, argLists, returns: AppliedTypeTree, _) if isZIO(returns) =>
-        val tagName = TermName(termName.toString.capitalize)
         val inputType = argLists.flatten match {
           case Nil => tq"Nothing"
           case arg :: Nil => arg.tpt
@@ -143,13 +142,12 @@ private[mock] class MockableMacro(val c: Context) {
             tq"(..$typeParams)"
         }
         val outputType = returns.args.last
-        Some(q"case object $tagName extends _root_.zio.test.mock.Method[$inputType, $outputType]")
+        Some(q"case object $termName extends _root_.zio.test.mock.Method[$inputType, $outputType]")
 
       case ValDef(_, termName, returns: AppliedTypeTree, _) if isZIO(returns) =>
-        val tagName = TermName(termName.toString.capitalize)
         val inputType = tq"Nothing"
         val outputType = returns.args.last
-        Some(q"case object $tagName extends _root_.zio.test.mock.Method[$inputType, $outputType]")
+        Some(q"case object $termName extends _root_.zio.test.mock.Method[$inputType, $outputType]")
 
       case _ => None
     }
@@ -158,22 +156,20 @@ private[mock] class MockableMacro(val c: Context) {
     service.body.flatMap {
 
       case DefDef(_, termName, _, argLists, returns: AppliedTypeTree, _) if isZIO(returns) =>
-        val tagName = TermName(termName.toString.capitalize)
         val (e :: a :: Nil) = returns.args.tail
         argLists.flatten match {
 
           case Nil =>
-            Some(q"def $termName(...$argLists): _root_.zio.IO[$e, $a] = mock(Service.$tagName)")
+            Some(q"def $termName(...$argLists): _root_.zio.IO[$e, $a] = mock(Service.$termName)")
 
           case args =>
             val argNames = args.map(_.name)
-            Some(q"def $termName(...$argLists): _root_.zio.IO[$e, $a] = mock(Service.$tagName)(..$argNames)")
+            Some(q"def $termName(...$argLists): _root_.zio.IO[$e, $a] = mock(Service.$termName)(..$argNames)")
         }
 
       case ValDef(_, termName, returns: AppliedTypeTree, _) if isZIO(returns) =>
-        val name = TermName(termName.toString.capitalize)
         val (e :: a :: Nil) = returns.args.tail
-        Some(q"val $termName: _root_.zio.IO[$e, $a] = mock(Service.$name)")
+        Some(q"val $termName: _root_.zio.IO[$e, $a] = mock(Service.$termName)")
 
       case _ => None
     }

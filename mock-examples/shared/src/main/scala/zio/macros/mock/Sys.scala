@@ -44,13 +44,13 @@ object Sys {
 
 object ValidateMockable {
   // if macro expands correctly code below should compile
-  val get: Method[Int, String]                  = Sys.Service.Get
-  val set: Method[(Int, String), Unit]          = Sys.Service.Set
-  val getAndSet: Method[(Int, String), String]  = Sys.Service.GetAndSet
-  val getAndSet2: Method[(Int, String), String] = Sys.Service.GetAndSet2
-  val clear: Method[Nothing, Unit]              = Sys.Service.Clear
-  val clear2: Method[Nothing, Unit]             = Sys.Service.Clear2
-  val clear3: Method[Nothing, Unit]             = Sys.Service.Clear3
+  val get: Method[Int, String]                  = Sys.Service.get
+  val set: Method[(Int, String), Unit]          = Sys.Service.set
+  val getAndSet: Method[(Int, String), String]  = Sys.Service.getAndSet
+  val getAndSet2: Method[(Int, String), String] = Sys.Service.getAndSet2
+  val clear: Method[Nothing, Unit]              = Sys.Service.clear
+  val clear2: Method[Nothing, Unit]             = Sys.Service.clear2
+  val clear3: Method[Nothing, Unit]             = Sys.Service.clear3
 
   val preValue: Int  = Sys.preValue
   val postValue: Int = Sys.postValue
