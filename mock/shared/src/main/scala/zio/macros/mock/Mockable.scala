@@ -134,7 +134,7 @@ private[mock] class MockableMacro(val c: Context) {
 
       case DefDef(_, termName, _, argLists, returns: AppliedTypeTree, _) if isZIO(returns) =>
         val inputType = argLists.flatten match {
-          case Nil => tq"Nothing"
+          case Nil => tq"Unit"
           case arg :: Nil => arg.tpt
           case args =>
             if (args.size > 22) abort(s"Unable to generate capability tag for method $termName with more than 22 arguments.")
@@ -145,7 +145,7 @@ private[mock] class MockableMacro(val c: Context) {
         Some(q"case object $termName extends _root_.zio.test.mock.Method[$inputType, $outputType]")
 
       case ValDef(_, termName, returns: AppliedTypeTree, _) if isZIO(returns) =>
-        val inputType = tq"Nothing"
+        val inputType = tq"Unit"
         val outputType = returns.args.last
         Some(q"case object $termName extends _root_.zio.test.mock.Method[$inputType, $outputType]")
 
@@ -164,7 +164,7 @@ private[mock] class MockableMacro(val c: Context) {
 
           case args =>
             val argNames = args.map(_.name)
-            Some(q"def $termName(...$argLists): _root_.zio.IO[$e, $a] = mock(Service.$termName)(..$argNames)")
+            Some(q"def $termName(...$argLists): _root_.zio.IO[$e, $a] = mock(Service.$termName, ..$argNames)")
         }
 
       case ValDef(_, termName, returns: AppliedTypeTree, _) if isZIO(returns) =>

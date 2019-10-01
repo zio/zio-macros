@@ -74,7 +74,7 @@ lazy val accessExamples = crossProject(JSPlatform, JVMPlatform)
   .settings(
     skip in publish := true,
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio" % "1.0.0-RC13+47-6a267471"
+      "dev.zio" %% "zio" % zioVersion
     )
   )
 
@@ -86,7 +86,7 @@ lazy val mock = crossProject(JSPlatform, JVMPlatform)
   )
   .settings(
     libraryDependencies ++= Seq(
-      "dev.zio"        %% "zio-test"       % "1.0.0-RC13+47-6a267471",
+      "dev.zio"        %% "zio-test"       % zioVersion,
       "org.scala-lang" %  "scala-reflect"  % scalaVersion.value % "provided",
       "org.scala-lang" %  "scala-compiler" % scalaVersion.value % "provided"
     )
@@ -99,6 +99,8 @@ lazy val mockExamples = crossProject(JSPlatform, JVMPlatform)
   .settings(
     skip in publish := true,
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio" % "1.0.0-RC13+47-6a267471"
+      "dev.zio" %% "zio" % zioVersion
     )
   )
+
+lazy val zioVersion = "1.0.0-RC13+67-e48b6a88+20191002-1015"

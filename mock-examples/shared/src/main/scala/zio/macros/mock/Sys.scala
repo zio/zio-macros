@@ -48,9 +48,9 @@ object ValidateMockable {
   val set: Method[(Int, String), Unit]          = Sys.Service.set
   val getAndSet: Method[(Int, String), String]  = Sys.Service.getAndSet
   val getAndSet2: Method[(Int, String), String] = Sys.Service.getAndSet2
-  val clear: Method[Nothing, Unit]              = Sys.Service.clear
-  val clear2: Method[Nothing, Unit]             = Sys.Service.clear2
-  val clear3: Method[Nothing, Unit]             = Sys.Service.clear3
+  val clear: Method[Unit, Unit]                 = Sys.Service.clear
+  val clear2: Method[Unit, Unit]                = Sys.Service.clear2
+  val clear3: Method[Unit, Unit]                = Sys.Service.clear3
 
   val preValue: Int  = Sys.preValue
   val postValue: Int = Sys.postValue
