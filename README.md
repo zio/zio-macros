@@ -18,7 +18,7 @@ The `@Accessable` annotation can be used on _modules_ following the [module patt
 
 When applied to the _module_ it will autogenerate the `>` container in module's compation object with helpers to access service capabilities:
 
-```
+```scala
 import zio.macros.access.Accessable
 
 @Accessable
@@ -45,7 +45,7 @@ object Example {
 
 You can use these helpers to refer to service _capabilities_ like:
 
-```
+```scala
 val myProgram =
   for {
     _ <- Example.>.foo
@@ -61,7 +61,7 @@ The `@Mockable` annotation can be used on _modules_ following the [module patter
 
 When applied to the _module_ it will autogenerate the `Service` companion object with _capability tags_ and the mockable implementation:
 
-```
+```scala
 import zio.macros.mock.Mockable
 
 @Mockable
@@ -105,7 +105,11 @@ object Example {
 
 You can use the mockable implementation and _capability tags_ to create ad-hoc mocked services like:
 
-```
+```scala
+import zio.Managed
+import zio.test.Assertion.equalTo
+import zio.test.mock.MockSpec
+
 val mockEnv: Managed[Nothing, Example] = (
   MockSpec.expect_(Example.baz)(equalTo(4 -> 7)("The answer to life:") *>
   MockSpec.expect_(Example.bar)(equalTo(4 -> 2)(42)
