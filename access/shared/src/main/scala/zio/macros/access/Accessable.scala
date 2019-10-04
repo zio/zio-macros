@@ -66,13 +66,22 @@ private[access] class AccessableMacro(val c: Context) {
     body: List[Tree]
   )
 
+  case class Capability(
+    name: TermName,
+    argLists: Option[List[List[ValDef]]],
+    env: Tree,
+    error: Tree,
+    value: Tree
+  )
+
   def apply(annottees: c.Tree*): c.Tree = {
-    val trees     = extractTrees(annottees)
-    val module    = extractModule(trees.module)
-    val companion = extractCompanion(trees.companion)
-    val service   = extractService(companion.body)
-    val accessors = generateCapabilityAccessors(module, companion, service)
-    val updated   = generateUpdatedCompanion(module, companion, accessors)
+    val trees       = extractTrees(annottees)
+    val module      = extractModule(trees.module)
+    val companion   = extractCompanion(trees.companion)
+    val service     = extractService(companion.body)
+    val capabilites = extractCapabilities(service)
+    val accessors   = generateCapabilityAccessors(trees.module, module.serviceName, capabilites)
+    val updated     = generateUpdatedCompanion(module, companion, accessors)
 
     q"""
        ${trees.module}
@@ -139,38 +148,34 @@ private[access] class AccessableMacro(val c: Context) {
       case _ => abort("Could not find service trait")
     }
 
-  private def generateCapabilityAccessors(
-    module: ModuleSummary,
-    companion: CompanionSummary,
-    service: ServiceSummary
-  ): List[Tree] =
-    service.body.flatMap {
+  private def extractCapabilities(service: ServiceSummary): List[Capability] =
+    service.body.collect {
+      case DefDef(_, termName, _, argLists, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), _)
+          if term.toString == "ZIO" =>
+        Capability(termName, Some(argLists), r, e, a)
 
-      case DefDef(_, termName, _, argLists, returns: AppliedTypeTree, _) if isZIO(returns) =>
-        val paramLists = argLists.map(_.map(_.name))
-        argLists.flatten match {
-
-          case Nil =>
-            Some(
-              q"def $termName(...$argLists) = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))"
-            )
-
-          case arg :: Nil =>
-            Some(
-              q"def $termName(...$argLists) = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))"
-            )
-
-          case args =>
-            Some(
-              q"def $termName(...$argLists) = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))"
-            )
-        }
-
-      case ValDef(_, termName, returns: AppliedTypeTree, _) if isZIO(returns) =>
-        Some(q"val $termName = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName)")
-
-      case _ => None
+      case ValDef(_, termName, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), _) if term.toString == "ZIO" =>
+        Capability(termName, None, r, e, a)
     }
+
+  private def generateCapabilityAccessors(
+    module: ClassDef,
+    serviceName: TermName,
+    capabilities: List[Capability]
+  ): List[Tree] = {
+    val moduleType = module.name
+    capabilities.map {
+      case Capability(name, None, _, e, a) =>
+        q"val $name: _root_.zio.IO[$e, $a] = _root_.zio.ZIO.accessM { case env: $moduleType => env.$serviceName.$name }"
+      case Capability(name, Some(Nil), _, e, a) =>
+        q"def $name: _root_.zio.IO[$e, $a] = _root_.zio.ZIO.accessM { case env: $moduleType => env.$serviceName.$name }"
+      case Capability(name, Some(List(Nil)), _, e, a) =>
+        q"def $name(): _root_.zio.IO[$e, $a] = _root_.zio.ZIO.accessM { case env: $moduleType => env.$serviceName.$name }"
+      case Capability(name, Some(argLists), _, e, a) =>
+        val argNames = argLists.map(_.map(_.name))
+        q"def $name(...$argLists): _root_.zio.IO[$e, $a] = _root_.zio.ZIO.accessM { case env: $moduleType => env.$serviceName.$name(...$argNames) }"
+    }
+  }
 
   private def generateUpdatedCompanion(
     module: ModuleSummary,
@@ -187,12 +192,6 @@ private[access] class AccessableMacro(val c: Context) {
        }
       }
     """
-
-  private def isZIO(returns: AppliedTypeTree): Boolean =
-    returns match {
-      case AppliedTypeTree(Ident(term), typeParams) => term.toString == "ZIO" && typeParams.size == 3
-      case _                                        => false
-    }
 
   private def abort(details: String) = {
     val error =
