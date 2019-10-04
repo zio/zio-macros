@@ -9,6 +9,7 @@ object BuildHelper {
   val compileOnlyDeps = Nil
 
   private val stdOptions = Seq(
+    "-Ymacro-debug-lite",
     "-Xfatal-warnings",
     "-language:higherKinds",
     "-language:existentials",

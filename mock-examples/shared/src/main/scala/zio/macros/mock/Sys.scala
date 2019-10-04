@@ -37,6 +37,7 @@ object Sys {
     def clear(): ZIO[R, Nothing, Unit]
     def clear2: ZIO[R, Nothing, Unit]
     val clear3: ZIO[R, Nothing, Unit]
+    def overloaded(value: Int): ZIO[R, Nothing, String]
   }
 
   val postValue: Int = 42

@@ -66,14 +66,23 @@ private[mock] class MockableMacro(val c: Context) {
     body: List[Tree]
   )
 
+  case class Capability(
+    name: TermName,
+    args: Option[List[List[ValDef]]],
+    env: Tree,
+    error: Tree,
+    value: Tree
+  )
+
   def apply(annottees: c.Tree*): c.Tree = {
-    val trees     = extractTrees(annottees)
-    val module    = extractModule(trees.module)
-    val companion = extractCompanion(trees.companion)
-    val service   = extractService(companion.body)
-    val tags      = generateCapabilityTags(module, companion, service)
-    val mocks     = generateCapabilityMocks(module, companion, service)
-    val updated   = generateUpdatedCompanion(module, companion, service, tags, mocks)
+    val trees       = extractTrees(annottees)
+    val module      = extractModule(trees.module)
+    val companion   = extractCompanion(trees.companion)
+    val service     = extractService(companion.body)
+    val capabilites = extractCapabilities(service)
+    val tags        = generateCapabilityTags(capabilites)
+    val mocks       = generateCapabilityMocks(capabilites)
+    val updated     = generateUpdatedCompanion(module, companion, service, tags, mocks)
 
     q"""
        ${trees.module}
@@ -129,49 +138,40 @@ private[mock] class MockableMacro(val c: Context) {
       case _ => abort("Could not find service trait")
     }
 
-  private def generateCapabilityTags(module: ModuleSummary, companion: CompanionSummary, service: ServiceSummary): List[Tree] =
-    service.body.flatMap {
+  private def extractCapabilities(service: ServiceSummary): List[Capability] =
+    service.body.collect {
+      case DefDef(_, termName, _, argLists, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), _) if term.toString == "ZIO" =>
+        Capability(termName, Some(argLists), r, e, a)
 
-      case DefDef(_, termName, _, argLists, returns: AppliedTypeTree, _) if isZIO(returns) =>
-        val inputType = argLists.flatten match {
+      case ValDef(_, termName, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), _) if term.toString == "ZIO" =>
+        Capability(termName, None, r, e, a)
+    }
+
+  private def generateCapabilityTags(capabilities: List[Capability]): List[Tree] =
+    capabilities.map {
+      case Capability(name, argLists, r, e, a) =>
+        val inputType = argLists.map(_.flatten).getOrElse(Nil) match {
           case Nil => tq"Unit"
           case arg :: Nil => arg.tpt
           case args =>
-            if (args.size > 22) abort(s"Unable to generate capability tag for method $termName with more than 22 arguments.")
+            if (args.size > 22) abort(s"Unable to generate capability tag for method $name with more than 22 arguments.")
             val typeParams = args.map(_.tpt)
             tq"(..$typeParams)"
         }
-        val outputType = returns.args.last
-        Some(q"case object $termName extends _root_.zio.test.mock.Method[$inputType, $outputType]")
-
-      case ValDef(_, termName, returns: AppliedTypeTree, _) if isZIO(returns) =>
-        val inputType = tq"Unit"
-        val outputType = returns.args.last
-        Some(q"case object $termName extends _root_.zio.test.mock.Method[$inputType, $outputType]")
-
-      case _ => None
+        q"case object $name extends _root_.zio.test.mock.Method[$inputType, $a]"
     }
 
-  private def generateCapabilityMocks(module: ModuleSummary, companion: CompanionSummary, service: ServiceSummary): List[Tree] =
-    service.body.flatMap {
-
-      case DefDef(_, termName, _, argLists, returns: AppliedTypeTree, _) if isZIO(returns) =>
-        val (e :: a :: Nil) = returns.args.tail
-        argLists.flatten match {
-
-          case Nil =>
-            Some(q"def $termName(...$argLists): _root_.zio.IO[$e, $a] = mock(Service.$termName)")
-
-          case args =>
-            val argNames = args.map(_.name)
-            Some(q"def $termName(...$argLists): _root_.zio.IO[$e, $a] = mock(Service.$termName, ..$argNames)")
-        }
-
-      case ValDef(_, termName, returns: AppliedTypeTree, _) if isZIO(returns) =>
-        val (e :: a :: Nil) = returns.args.tail
-        Some(q"val $termName: _root_.zio.IO[$e, $a] = mock(Service.$termName)")
-
-      case _ => None
+  private def generateCapabilityMocks(capabilities: List[Capability]): List[Tree] =
+    capabilities.map {
+      case Capability(name, None, r, e, a) =>
+        q"val $name: _root_.zio.IO[$e, $a] = mock(Service.$name)"
+      case Capability(name, Some(Nil), r, e, a) =>
+        q"def $name: _root_.zio.IO[$e, $a] = mock(Service.$name)"
+      case Capability(name, Some(List(Nil)), r, e, a) =>
+        q"def $name(): _root_.zio.IO[$e, $a] = mock(Service.$name)"
+      case Capability(name, Some(argLists), r, e, a) =>
+        val argNames = argLists.flatten.map(_.name)
+        q"def $name(...$argLists): _root_.zio.IO[$e, $a] = mock(Service.$name, ..$argNames)"
     }
 
   private def generateUpdatedCompanion(module: ModuleSummary, companion: CompanionSummary, service: ServiceSummary, capabilityTags: List[Tree], capabilityMocks: List[Tree]): Tree =
@@ -198,12 +198,6 @@ private[mock] class MockableMacro(val c: Context) {
         ..${service.nextSiblings}
       }
     """
-
-  private def isZIO(returns: AppliedTypeTree): Boolean =
-    returns match {
-      case AppliedTypeTree(Ident(term), typeParams) => term.toString == "ZIO" && typeParams.size == 3
-      case _ => false
-    }
 
   private def abort(details: String) = {
     val error = "The annotation can only be used on ZIO modules (see https://zio.dev/docs/overview/overview_module_pattern)."

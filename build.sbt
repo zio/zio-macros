@@ -103,4 +103,4 @@ lazy val mockExamples = crossProject(JSPlatform, JVMPlatform)
     )
   )
 
-lazy val zioVersion = "1.0.0-RC13+67-e48b6a88+20191002-1015"
+lazy val zioVersion = "1.0.0-RC13+88-79298817"
