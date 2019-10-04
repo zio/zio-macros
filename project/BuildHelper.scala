@@ -21,7 +21,8 @@ object BuildHelper {
   )
 
   private val std2xOptions = Seq(
-    // "-Ymacro-debug-lite",
+    //"-Ymacro-debug-lite",
+    //"-Ymacro-debug-verbose",
     "-Xfatal-warnings",
     "-language:higherKinds",
     "-language:existentials",
@@ -81,7 +82,7 @@ object BuildHelper {
     Seq(
       name := s"$prjName",
       scalacOptions := stdOptions,
-      crossScalaVersions := Seq("2.13.0", "2.12.8", "2.11.12"),
+      crossScalaVersions := Seq( /*"2.13.0",*/ "2.12.8", "2.11.12"),
       scalaVersion in ThisBuild := crossScalaVersions.value.head,
       scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
       libraryDependencies ++= compileOnlyDeps ++ testDeps ++ Seq(
@@ -103,10 +104,10 @@ object BuildHelper {
         CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, x)) if x <= 11 =>
             CrossType.Full.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + "-2.11")) ++
-            CrossType.Full.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + "-2.11"))
+              CrossType.Full.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + "-2.11"))
           case Some((2, x)) if x >= 12 =>
             CrossType.Full.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + "-2.12+")) ++
-            CrossType.Full.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + "-2.12+"))
+              CrossType.Full.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + "-2.12+"))
           case _ => Nil
         }
       },
@@ -128,8 +129,8 @@ object BuildHelper {
     Seq(
       scalacOptions --= Seq("-deprecation", "-Xfatal-warnings"),
       libraryDependencies ++= Seq(
-        "org.scala-lang" %  "scala-reflect"  % scalaVersion.value % "provided",
-        "org.scala-lang" %  "scala-compiler" % scalaVersion.value % "provided"
+        "org.scala-lang" % "scala-reflect"  % scalaVersion.value % "provided",
+        "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided"
       )
     )
 

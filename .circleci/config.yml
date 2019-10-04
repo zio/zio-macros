@@ -132,12 +132,12 @@ jobs:
       - <<: *scala_212
       - <<: *jdk_8
 
-  test_213_jdk8_jvm:
-    <<: *testJVM
-    <<: *machine_ubuntu
-    environment:
-      - <<: *scala_213
-      - <<: *jdk_8
+#  test_213_jdk8_jvm:
+#    <<: *testJVM
+#    <<: *machine_ubuntu
+#    environment:
+#      - <<: *scala_213
+#      - <<: *jdk_8
 
   test_211_jdk11_jvm:
     <<: *testJVM
@@ -153,12 +153,12 @@ jobs:
       - <<: *scala_212
       - <<: *jdk_11
 
-  test_213_jdk11_jvm:
-    <<: *testJVM
-    <<: *machine_ubuntu
-    environment:
-      - <<: *scala_213
-      - <<: *jdk_11
+#  test_213_jdk11_jvm:
+#    <<: *testJVM
+#    <<: *machine_ubuntu
+#    environment:
+#      - <<: *scala_213
+#      - <<: *jdk_11
 
   test_211_jdk8_js:
     <<: *testJS
@@ -174,12 +174,12 @@ jobs:
       - <<: *scala_212
       - <<: *jdk_8
 
-  test_213_jdk8_js:
-    <<: *testJS
-    <<: *machine_ubuntu
-    environment:
-      - <<: *scala_213
-      - <<: *jdk_8
+#  test_213_jdk8_js:
+#    <<: *testJS
+#    <<: *machine_ubuntu
+#    environment:
+#      - <<: *scala_213
+#      - <<: *jdk_8
 
   test_211_jdk11_js:
     <<: *testJS
@@ -195,12 +195,12 @@ jobs:
       - <<: *scala_212
       - <<: *jdk_11
 
-  test_213_jdk11_js:
-    <<: *testJS
-    <<: *machine_ubuntu
-    environment:
-      - <<: *scala_213
-      - <<: *jdk_11
+#  test_213_jdk11_js:
+#    <<: *testJS
+#    <<: *machine_ubuntu
+#    environment:
+#      - <<: *scala_213
+#      - <<: *jdk_11
 
   release_211:
     <<: *release
@@ -216,12 +216,12 @@ jobs:
       - <<: *scala_212
       - <<: *jdk_8
 
-  release_213:
-    <<: *release
-    <<: *machine_ubuntu
-    environment:
-      - <<: *scala_213
-      - <<: *jdk_8
+#  release_213:
+#    <<: *release
+#    <<: *machine_ubuntu
+#    environment:
+#      - <<: *scala_213
+#      - <<: *jdk_8
 
 workflows:
   version: 2
@@ -243,12 +243,12 @@ workflows:
           filters:
             tags:
               only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
-      - test_213_jdk8_jvm:
-          requires:
-            - lint
-          filters:
-            tags:
-              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+#      - test_213_jdk8_jvm:
+#          requires:
+#            - lint
+#          filters:
+#            tags:
+#              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
       - test_211_jdk11_jvm:
           requires:
             - lint
@@ -261,12 +261,12 @@ workflows:
           filters:
             tags:
               only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
-      - test_213_jdk11_jvm:
-          requires:
-            - lint
-          filters:
-            tags:
-              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+#      - test_213_jdk11_jvm:
+#          requires:
+#            - lint
+#          filters:
+#            tags:
+#              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
       - test_211_jdk8_js:
           requires:
             - lint
@@ -279,12 +279,12 @@ workflows:
           filters:
             tags:
               only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
-      - test_213_jdk8_js:
-          requires:
-            - lint
-          filters:
-            tags:
-              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+#      - test_213_jdk8_js:
+#          requires:
+#            - lint
+#          filters:
+#            tags:
+#              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
       - test_211_jdk11_js:
           requires:
             - lint
@@ -297,12 +297,12 @@ workflows:
           filters:
             tags:
               only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
-      - test_213_jdk11_js:
-          requires:
-            - lint
-          filters:
-            tags:
-              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+#      - test_213_jdk11_js:
+#          requires:
+#            - lint
+#          filters:
+#            tags:
+#              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
       - release_211:
           context: Sonatype
           requires:
@@ -314,10 +314,10 @@ workflows:
             - test_212_jdk11_jvm
             - test_212_jdk8_js
             - test_212_jdk11_js
-            - test_213_jdk8_jvm
-            - test_213_jdk11_jvm
-            - test_213_jdk8_js
-            - test_213_jdk11_js
+#            - test_213_jdk8_jvm
+#            - test_213_jdk11_jvm
+#            - test_213_jdk8_js
+#            - test_213_jdk11_js
           filters:
             branches:
               ignore: /.*/
@@ -332,12 +332,12 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
-      - release_213:
-          context: Sonatype
-          requires:
-            - release_212
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+#      - release_213:
+#          context: Sonatype
+#          requires:
+#            - release_212
+#          filters:
+#            branches:
+#              ignore: /.*/
+#            tags:
+#              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/

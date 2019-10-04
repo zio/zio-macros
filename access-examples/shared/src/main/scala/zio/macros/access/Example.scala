@@ -15,7 +15,7 @@
  */
 package zio.macros.access
 
-import zio.{URIO, ZIO}
+import zio.{ URIO, ZIO }
 
 @Accessable
 trait Example {

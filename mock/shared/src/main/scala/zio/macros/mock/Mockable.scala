@@ -15,7 +15,9 @@
  */
 package zio.macros.mock
 
-import scala.annotation.{compileTimeOnly, StaticAnnotation}
+import zio.macros.core.ModulePattern
+
+import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
@@ -24,55 +26,8 @@ class Mockable() extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro MockableMacro.apply
 }
 
-private[mock] class MockableMacro(val c: Context) {
+private[mock] class MockableMacro(val c: Context) extends ModulePattern {
   import c.universe._
-
-  case class TreesSummary(
-    module: ClassDef,
-    companion: ModuleDef
-  )
-
-  case class ModuleSummary(
-    previousSiblings: List[Tree],
-    nextSiblings: List[Tree],
-    mods: Modifiers,
-    name: TypeName,
-    typeParams: List[TypeDef],
-    earlyDefinitions: List[Tree],
-    parents: List[Tree],
-    self: ValDef,
-    body: List[Tree],
-    serviceName: TermName
-  )
-
-  case class CompanionSummary(
-    mods: Modifiers,
-    name: TermName,
-    earlyDefinitions: List[Tree],
-    parents: List[Tree],
-    self: ValDef,
-    body: List[Tree]
-  )
-
-  case class ServiceSummary(
-    previousSiblings: List[Tree],
-    service: Tree,
-    nextSiblings: List[Tree],
-    mods: Modifiers,
-    typeParams: List[TypeDef],
-    earlyDefinitions: List[Tree],
-    parents: List[Tree],
-    self: ValDef,
-    body: List[Tree]
-  )
-
-  case class Capability(
-    name: TermName,
-    argLists: Option[List[List[ValDef]]],
-    env: Tree,
-    error: Tree,
-    value: Tree
-  )
 
   def apply(annottees: c.Tree*): c.Tree = {
     val trees       = extractTrees(annottees)
@@ -90,80 +45,26 @@ private[mock] class MockableMacro(val c: Context) {
      """
   }
 
-  private def extractTrees(annottees: Seq[c.Tree]): TreesSummary =
-    annottees match {
-      case (module: ClassDef) :: (companion: ModuleDef) :: Nil if module.name.toTermName == companion.name  =>
-        TreesSummary(module, companion)
-      case (companion: ModuleDef) :: (module: ClassDef) :: Nil if module.name.toTermName == companion.name  =>
-        TreesSummary(module, companion)
-      case _ => abort("Module trait and companion object pair not found")
-    }
-
-  private def extractModule(module: ClassDef): ModuleSummary =
-    module match {
-      case q"$mods trait $moduleName[..$typeParams] extends { ..$earlyDefinitions } with ..$parents { $self => ..$body }" =>
-        body.indexWhere {
-          case ValDef(mods, name, typeTree, rhs) =>
-            val moduleTerm = moduleName.toTermName
-            name.toString.capitalize == moduleTerm.toString && typeTree.toString == s"$moduleTerm.Service[Any]"
-          case _ => false
-        } match {
-          case idx if idx >= 0 =>
-            val (prevSiblings, service :: nextSiblings) = body.splitAt(idx)
-            ModuleSummary(prevSiblings, nextSiblings, mods, moduleName, typeParams, earlyDefinitions, parents, self, body, service.asInstanceOf[ValDef].name.toTermName)
-          case _ => abort("Service value not found in module trait")
-        }
-      case _ => abort("Could not extract module trait")
-    }
-
-  private def extractCompanion(companion: ModuleDef): CompanionSummary =
-    companion match {
-      case q"$mods object $name extends { ..$earlyDefinitions } with ..$parents { $self => ..$body }" =>
-        CompanionSummary(mods, name, earlyDefinitions, parents, self, body)
-      case _ => abort("Count not extract module companion")
-    }
-
-  private def extractService(body: List[Tree]): ServiceSummary =
-    body.indexWhere {
-      case ClassDef(mods, name, typeParams, implementation) => name.toTermName.toString == "Service"
-      case _ => false
-    } match {
-      case idx if idx >= 0 =>
-        val (prevSiblings, service :: nextSiblings) = body.splitAt(idx)
-        service match {
-          case q"$mods trait Service[..$typeParams] extends { ..$earlyDefinitions } with ..$parents { $self => ..$body }" =>
-            ServiceSummary(prevSiblings, service, nextSiblings, mods, typeParams, earlyDefinitions, parents, self, body)
-          case _ => abort("Could not extract service trait")
-        }
-      case _ => abort("Could not find service trait")
-    }
-
-  private def extractCapabilities(service: ServiceSummary): List[Capability] =
-    service.body.collect {
-      case DefDef(_, termName, _, argLists, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), _) if term.toString == "ZIO" =>
-        Capability(termName, Some(argLists), r, e, a)
-
-      case ValDef(_, termName, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), _) if term.toString == "ZIO" =>
-        Capability(termName, None, r, e, a)
-    }
-
   private def generateCapabilityTags(capabilities: List[Capability]): List[Tree] =
-    capabilities.groupBy(_.name).collect {
-      case (name, capability :: Nil) =>
-        generateCapabilityTag(name, capability)
-      case (name, overloads) =>
-        val body: List[Tree] = overloads.zipWithIndex.map {
-          case (capability, idx) =>
-            val idxName = TermName(s"_$idx")
-            generateCapabilityTag(idxName, capability)
-        }
+    capabilities
+      .groupBy(_.name)
+      .collect {
+        case (name, capability :: Nil) =>
+          generateCapabilityTag(name, capability)
+        case (name, overloads) =>
+          val body: List[Tree] = overloads.zipWithIndex.map {
+            case (capability, idx) =>
+              val idxName = TermName(s"_$idx")
+              generateCapabilityTag(idxName, capability)
+          }
 
-        q"object $name { ..$body }"
-    }.toList
+          q"object $name { ..$body }"
+      }
+      .toList
 
   private def generateCapabilityTag(name: TermName, capability: Capability): Tree = {
     val inputType = capability.argLists.map(_.flatten).getOrElse(Nil) match {
-      case Nil => tq"Unit"
+      case Nil        => tq"Unit"
       case arg :: Nil => arg.tpt
       case args =>
         if (args.size > 22) abort(s"Unable to generate capability tag for method $name with more than 22 arguments.")
@@ -175,16 +76,20 @@ private[mock] class MockableMacro(val c: Context) {
   }
 
   private def generateCapabilityMocks(capabilities: List[Capability]): List[Tree] =
-    capabilities.groupBy(_.name).collect {
-      case (name, capability :: Nil) =>
-        List(generateCapabilityMock(capability, None))
-      case (name, overloads) =>
-        overloads.zipWithIndex.map {
-          case (capability, idx) =>
-            val idxName = TermName(s"_$idx")
-            generateCapabilityMock(capability, Some(idxName))
-        }
-    }.toList.flatten
+    capabilities
+      .groupBy(_.name)
+      .collect {
+        case (name, capability :: Nil) =>
+          List(generateCapabilityMock(capability, None))
+        case (name, overloads) =>
+          overloads.zipWithIndex.map {
+            case (capability, idx) =>
+              val idxName = TermName(s"_$idx")
+              generateCapabilityMock(capability, Some(idxName))
+          }
+      }
+      .toList
+      .flatten
 
   private def generateCapabilityMock(capability: Capability, overloadIndex: Option[TermName]): Tree = {
     val tag = overloadIndex match {
@@ -205,7 +110,13 @@ private[mock] class MockableMacro(val c: Context) {
     }
   }
 
-  private def generateUpdatedCompanion(module: ModuleSummary, companion: CompanionSummary, service: ServiceSummary, capabilityTags: List[Tree], capabilityMocks: List[Tree]): Tree =
+  private def generateUpdatedCompanion(
+    module: ModuleSummary,
+    companion: CompanionSummary,
+    service: ServiceSummary,
+    capabilityTags: List[Tree],
+    capabilityMocks: List[Tree]
+  ): Tree =
     q"""
       object ${companion.name} {
 
@@ -229,9 +140,4 @@ private[mock] class MockableMacro(val c: Context) {
         ..${service.nextSiblings}
       }
     """
-
-  private def abort(details: String) = {
-    val error = "The annotation can only applied to modules following the module pattern (see https://zio.dev/docs/howto/howto_use_module_pattern)."
-    c.abort(c.enclosingPosition, s"$error $details.")
-  }
 }
