@@ -52,6 +52,8 @@ lazy val root = project
     access.js,
     accessExamples.jvm,
     accessExamples.js,
+    core.jvm,
+    core.js,
     mock.jvm,
     mock.js,
     mockExamples.jvm,
@@ -59,8 +61,15 @@ lazy val root = project
   )
   .enablePlugins(ScalaJSPlugin)
 
+lazy val core = crossProject(JSPlatform, JVMPlatform)
+  .in(file("core"))
+  .settings(stdSettings("zio-macros-core"))
+  .settings(macroSettings())
+  .settings(skip in publish := true)
+
 lazy val access = crossProject(JSPlatform, JVMPlatform)
   .in(file("access"))
+  .dependsOn(core)
   .settings(stdSettings("zio-macros-access"))
   .settings(macroSettings())
 
@@ -72,6 +81,7 @@ lazy val accessExamples = crossProject(JSPlatform, JVMPlatform)
 
 lazy val mock = crossProject(JSPlatform, JVMPlatform)
   .in(file("mock"))
+  .dependsOn(core)
   .settings(stdSettings("zio-macros-mock"))
   .settings(macroSettings())
   .settings(libraryDependencies += "dev.zio" %% "zio-test" % zioVersion)
