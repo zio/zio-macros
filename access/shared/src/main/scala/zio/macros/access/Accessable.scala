@@ -15,7 +15,7 @@
  */
 package zio.macros.access
 
-import scala.annotation.{compileTimeOnly, StaticAnnotation}
+import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
@@ -82,9 +82,9 @@ private[access] class AccessableMacro(val c: Context) {
 
   private def extractTrees(annottees: Seq[c.Tree]): TreesSummary =
     annottees match {
-      case (module: ClassDef) :: (companion: ModuleDef) :: Nil if module.name.toTermName == companion.name  =>
+      case (module: ClassDef) :: (companion: ModuleDef) :: Nil if module.name.toTermName == companion.name =>
         TreesSummary(module, companion)
-      case (companion: ModuleDef) :: (module: ClassDef) :: Nil if module.name.toTermName == companion.name  =>
+      case (companion: ModuleDef) :: (module: ClassDef) :: Nil if module.name.toTermName == companion.name =>
         TreesSummary(module, companion)
       case _ => abort("Module trait and companion object pair not found")
     }
@@ -100,7 +100,18 @@ private[access] class AccessableMacro(val c: Context) {
         } match {
           case idx if idx >= 0 =>
             val (prevSiblings, service :: nextSiblings) = body.splitAt(idx)
-            ModuleSummary(prevSiblings, nextSiblings, mods, moduleName, typeParams, earlyDefinitions, parents, self, body, service.asInstanceOf[ValDef].name.toTermName)
+            ModuleSummary(
+              prevSiblings,
+              nextSiblings,
+              mods,
+              moduleName,
+              typeParams,
+              earlyDefinitions,
+              parents,
+              self,
+              body,
+              service.asInstanceOf[ValDef].name.toTermName
+            )
           case _ => abort("Service value not found in module trait")
         }
       case _ => abort("Could not extract module trait")
@@ -116,7 +127,7 @@ private[access] class AccessableMacro(val c: Context) {
   private def extractService(body: List[Tree]): ServiceSummary =
     body.indexWhere {
       case ClassDef(mods, name, typeParams, implementation) => name.toTermName.toString == "Service"
-      case _ => false
+      case _                                                => false
     } match {
       case idx if idx >= 0 =>
         val (prevSiblings, service :: nextSiblings) = body.splitAt(idx)
@@ -128,7 +139,11 @@ private[access] class AccessableMacro(val c: Context) {
       case _ => abort("Could not find service trait")
     }
 
-  private def generateCapabilityAccessors(module: ModuleSummary, companion: CompanionSummary, service: ServiceSummary): List[Tree] =
+  private def generateCapabilityAccessors(
+    module: ModuleSummary,
+    companion: CompanionSummary,
+    service: ServiceSummary
+  ): List[Tree] =
     service.body.flatMap {
 
       case DefDef(_, termName, _, argLists, returns: AppliedTypeTree, _) if isZIO(returns) =>
@@ -136,13 +151,19 @@ private[access] class AccessableMacro(val c: Context) {
         argLists.flatten match {
 
           case Nil =>
-            Some(q"def $termName(...$argLists) = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))")
+            Some(
+              q"def $termName(...$argLists) = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))"
+            )
 
           case arg :: Nil =>
-            Some(q"def $termName(...$argLists) = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))")
+            Some(
+              q"def $termName(...$argLists) = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))"
+            )
 
           case args =>
-            Some(q"def $termName(...$argLists) = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))")
+            Some(
+              q"def $termName(...$argLists) = _root_.zio.ZIO.accessM(_.${module.serviceName}.$termName(...$paramLists))"
+            )
         }
 
       case ValDef(_, termName, returns: AppliedTypeTree, _) if isZIO(returns) =>
@@ -151,7 +172,11 @@ private[access] class AccessableMacro(val c: Context) {
       case _ => None
     }
 
-  private def generateUpdatedCompanion(module: ModuleSummary, companion: CompanionSummary, capabilityAccessors: List[Tree]): Tree =
+  private def generateUpdatedCompanion(
+    module: ModuleSummary,
+    companion: CompanionSummary,
+    capabilityAccessors: List[Tree]
+  ): Tree =
     q"""
       object ${companion.name} {
 
@@ -166,11 +191,12 @@ private[access] class AccessableMacro(val c: Context) {
   private def isZIO(returns: AppliedTypeTree): Boolean =
     returns match {
       case AppliedTypeTree(Ident(term), typeParams) => term.toString == "ZIO" && typeParams.size == 3
-      case _ => false
+      case _                                        => false
     }
 
   private def abort(details: String) = {
-    val error = "The annotation can only applied to modules following the module pattern (see https://zio.dev/docs/howto/howto_use_module_pattern)."
+    val error =
+      "The annotation can only applied to modules following the module pattern (see https://zio.dev/docs/howto/howto_use_module_pattern)."
     c.abort(c.enclosingPosition, s"$error $details.")
   }
 }

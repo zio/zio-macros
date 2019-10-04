@@ -103,10 +103,10 @@ object BuildHelper {
         CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, x)) if x <= 11 =>
             CrossType.Full.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + "-2.11")) ++
-            CrossType.Full.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + "-2.11"))
+              CrossType.Full.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + "-2.11"))
           case Some((2, x)) if x >= 12 =>
             CrossType.Full.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + "-2.12+")) ++
-            CrossType.Full.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + "-2.12+"))
+              CrossType.Full.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + "-2.12+"))
           case _ => Nil
         }
       },
@@ -128,8 +128,8 @@ object BuildHelper {
     Seq(
       scalacOptions --= Seq("-deprecation", "-Xfatal-warnings"),
       libraryDependencies ++= Seq(
-        "org.scala-lang" %  "scala-reflect"  % scalaVersion.value % "provided",
-        "org.scala-lang" %  "scala-compiler" % scalaVersion.value % "provided"
+        "org.scala-lang" % "scala-reflect"  % scalaVersion.value % "provided",
+        "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided"
       )
     )
 
