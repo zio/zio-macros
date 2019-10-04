@@ -104,8 +104,11 @@ release: &release
           name: Write PGP secret key
           command: echo -n "${PGP_SECRET}" | base64 -d > /tmp/secret.asc
       - run:
+          name: Write sonatype credentials
+          command: echo "credentials += Credentials(\"Sonatype Nexus Repository Manager\", \"oss.sonatype.org\", \"${SONATYPE_USER}\", \"${SONATYPE_PASSWORD}\")" > ~/.sbt/1.0/sonatype.sbt
+      - run:
           name: Release artifacts
-          command: ./sbt ++${SCALA_VERSION}! releaseEarly
+          command: ./sbt ++${SCALA_VERSION}! clean sonatypeBundleClean +publishSigned sonatypeBundleRelease
 
 jobs:
   lint:

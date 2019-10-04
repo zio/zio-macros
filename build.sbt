@@ -1,6 +1,6 @@
 import sbtcrossproject.CrossPlugin.autoImport.crossProject
+import explicitdeps.ExplicitDepsPlugin.autoImport.moduleFilterRemoveValue
 import BuildHelper._
-import xerial.sbt.Sonatype._
 
 inThisBuild(
   List(
@@ -29,18 +29,22 @@ inThisBuild(
     ),
     licenses := Seq("Apache-2.0" -> url(s"${scmInfo.value.map(_.browseUrl).get}/blob/v${version.value}/LICENSE")),
     pgpPublicRing := file("/tmp/public.asc"),
-    pgpSecretRing := file("/tmp/secret.asc"),
-    releaseEarlyWith := SonatypePublisher
+    pgpSecretRing := file("/tmp/secret.asc")
   )
 )
 
+ThisBuild / publishTo := sonatypePublishToBundle.value
+
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
+addCommandAlias("testJVM", ";accessExamplesJVM/test;mockExamplesJVM/test")
+addCommandAlias("testJS", ";accessExamplesJS/test;mockExamplesJS/test")
 
 lazy val root = project
   .in(file("."))
   .settings(
-    skip in publish := true
+    skip in publish := true,
+    unusedCompileDependenciesFilter -= moduleFilter("org.scala-js", "scalajs-library")
   )
   .aggregate(
     access.jvm,
