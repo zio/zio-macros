@@ -170,7 +170,7 @@ private[access] class AccessableMacro(val c: Context) {
     }
 
   private def abort(details: String) = {
-    val error = "The annotation can only be used on ZIO modules (see https://zio.dev/docs/overview/overview_module_pattern)."
+    val error = "The annotation can only applied to modules following the module pattern (see https://zio.dev/docs/howto/howto_use_module_pattern)."
     c.abort(c.enclosingPosition, s"$error $details.")
   }
 }

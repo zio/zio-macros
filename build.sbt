@@ -57,50 +57,22 @@ lazy val root = project
 lazy val access = crossProject(JSPlatform, JVMPlatform)
   .in(file("access"))
   .settings(stdSettings("zio-macros-access"))
-  .settings(
-    scalacOptions --= Seq("-deprecation", "-Xfatal-warnings")
-  )
-  .settings(
-    libraryDependencies ++= Seq(
-      "org.scala-lang" %  "scala-reflect"  % scalaVersion.value % "provided",
-      "org.scala-lang" %  "scala-compiler" % scalaVersion.value % "provided"
-    )
-  )
+  .settings(macroSettings())
 
 lazy val accessExamples = crossProject(JSPlatform, JVMPlatform)
   .in(file("access-examples"))
   .dependsOn(access)
   .settings(stdSettings("zio-macros-access-examples"))
-  .settings(
-    skip in publish := true,
-    libraryDependencies ++= Seq(
-      "dev.zio" %% "zio" % zioVersion
-    )
-  )
+  .settings(examplesSettings())
 
 lazy val mock = crossProject(JSPlatform, JVMPlatform)
   .in(file("mock"))
   .settings(stdSettings("zio-macros-mock"))
-  .settings(
-    scalacOptions --= Seq("-deprecation", "-Xfatal-warnings")
-  )
-  .settings(
-    libraryDependencies ++= Seq(
-      "dev.zio"        %% "zio-test"       % zioVersion,
-      "org.scala-lang" %  "scala-reflect"  % scalaVersion.value % "provided",
-      "org.scala-lang" %  "scala-compiler" % scalaVersion.value % "provided"
-    )
-  )
+  .settings(macroSettings())
+  .settings(libraryDependencies += "dev.zio" %% "zio-test" % zioVersion)
 
 lazy val mockExamples = crossProject(JSPlatform, JVMPlatform)
   .in(file("mock-examples"))
   .dependsOn(mock)
   .settings(stdSettings("zio-macros-mock-examples"))
-  .settings(
-    skip in publish := true,
-    libraryDependencies ++= Seq(
-      "dev.zio" %% "zio" % zioVersion
-    )
-  )
-
-lazy val zioVersion = "1.0.0-RC13+88-79298817"
+  .settings(examplesSettings())

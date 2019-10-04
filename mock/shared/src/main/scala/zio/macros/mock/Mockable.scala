@@ -68,7 +68,7 @@ private[mock] class MockableMacro(val c: Context) {
 
   case class Capability(
     name: TermName,
-    args: Option[List[List[ValDef]]],
+    argLists: Option[List[List[ValDef]]],
     env: Tree,
     error: Tree,
     value: Tree
@@ -148,31 +148,62 @@ private[mock] class MockableMacro(val c: Context) {
     }
 
   private def generateCapabilityTags(capabilities: List[Capability]): List[Tree] =
-    capabilities.map {
-      case Capability(name, argLists, r, e, a) =>
-        val inputType = argLists.map(_.flatten).getOrElse(Nil) match {
-          case Nil => tq"Unit"
-          case arg :: Nil => arg.tpt
-          case args =>
-            if (args.size > 22) abort(s"Unable to generate capability tag for method $name with more than 22 arguments.")
-            val typeParams = args.map(_.tpt)
-            tq"(..$typeParams)"
+    capabilities.groupBy(_.name).collect {
+      case (name, capability :: Nil) =>
+        generateCapabilityTag(name, capability)
+      case (name, overloads) =>
+        val body: List[Tree] = overloads.zipWithIndex.map {
+          case (capability, idx) =>
+            val idxName = TermName(s"_$idx")
+            generateCapabilityTag(idxName, capability)
         }
-        q"case object $name extends _root_.zio.test.mock.Method[$inputType, $a]"
+
+        q"object $name { ..$body }"
+    }.toList
+
+  private def generateCapabilityTag(name: TermName, capability: Capability): Tree = {
+    val inputType = capability.argLists.map(_.flatten).getOrElse(Nil) match {
+      case Nil => tq"Unit"
+      case arg :: Nil => arg.tpt
+      case args =>
+        if (args.size > 22) abort(s"Unable to generate capability tag for method $name with more than 22 arguments.")
+        val typeParams = args.map(_.tpt)
+        tq"(..$typeParams)"
     }
+    val outputType = capability.value
+    q"case object $name extends _root_.zio.test.mock.Method[$inputType, $outputType]"
+  }
 
   private def generateCapabilityMocks(capabilities: List[Capability]): List[Tree] =
-    capabilities.map {
-      case Capability(name, None, r, e, a) =>
-        q"val $name: _root_.zio.IO[$e, $a] = mock(Service.$name)"
-      case Capability(name, Some(Nil), r, e, a) =>
-        q"def $name: _root_.zio.IO[$e, $a] = mock(Service.$name)"
-      case Capability(name, Some(List(Nil)), r, e, a) =>
-        q"def $name(): _root_.zio.IO[$e, $a] = mock(Service.$name)"
-      case Capability(name, Some(argLists), r, e, a) =>
-        val argNames = argLists.flatten.map(_.name)
-        q"def $name(...$argLists): _root_.zio.IO[$e, $a] = mock(Service.$name, ..$argNames)"
+    capabilities.groupBy(_.name).collect {
+      case (name, capability :: Nil) =>
+        List(generateCapabilityMock(capability, None))
+      case (name, overloads) =>
+        overloads.zipWithIndex.map {
+          case (capability, idx) =>
+            val idxName = TermName(s"_$idx")
+            generateCapabilityMock(capability, Some(idxName))
+        }
+    }.toList.flatten
+
+  private def generateCapabilityMock(capability: Capability, overloadIndex: Option[TermName]): Tree = {
+    val tag = overloadIndex match {
+      case Some(index) => q"Service.${capability.name}.$index"
+      case None        => q"Service.${capability.name}"
     }
+
+    capability match {
+      case Capability(name, None, _, e, a) =>
+        q"val $name: _root_.zio.IO[$e, $a] = mock($tag)"
+      case Capability(name, Some(Nil), _, e, a) =>
+        q"def $name: _root_.zio.IO[$e, $a] = mock($tag)"
+      case Capability(name, Some(List(Nil)), _, e, a) =>
+        q"def $name(): _root_.zio.IO[$e, $a] = mock($tag)"
+      case Capability(name, Some(argLists), _, e, a) =>
+        val argNames = argLists.flatten.map(_.name)
+        q"def $name(...$argLists): _root_.zio.IO[$e, $a] = mock($tag, ..$argNames)"
+    }
+  }
 
   private def generateUpdatedCompanion(module: ModuleSummary, companion: CompanionSummary, service: ServiceSummary, capabilityTags: List[Tree], capabilityMocks: List[Tree]): Tree =
     q"""
@@ -200,7 +231,7 @@ private[mock] class MockableMacro(val c: Context) {
     """
 
   private def abort(details: String) = {
-    val error = "The annotation can only be used on ZIO modules (see https://zio.dev/docs/overview/overview_module_pattern)."
+    val error = "The annotation can only applied to modules following the module pattern (see https://zio.dev/docs/howto/howto_use_module_pattern)."
     c.abort(c.enclosingPosition, s"$error $details.")
   }
 }

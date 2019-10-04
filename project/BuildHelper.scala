@@ -8,8 +8,10 @@ object BuildHelper {
   val testDeps        = Seq("org.scalatest" %% "scalatest" % "3.0.8" % "test")
   val compileOnlyDeps = Nil
 
+  val zioVersion = "1.0.0-RC14"
+
   private val stdOptions = Seq(
-    "-Ymacro-debug-lite",
+//    "-Ymacro-debug-lite",
     "-Xfatal-warnings",
     "-language:higherKinds",
     "-language:existentials",
@@ -125,6 +127,21 @@ object BuildHelper {
         }
       }
     ) ++ replSettings
+
+  def macroSettings() =
+    Seq(
+      scalacOptions --= Seq("-deprecation", "-Xfatal-warnings"),
+      libraryDependencies ++= Seq(
+        "org.scala-lang" %  "scala-reflect"  % scalaVersion.value % "provided",
+        "org.scala-lang" %  "scala-compiler" % scalaVersion.value % "provided"
+      )
+    )
+
+  def examplesSettings() =
+    Seq(
+      skip in publish := true,
+      libraryDependencies += "dev.zio" %% "zio" % zioVersion
+    )
 
   implicit class ModuleHelper(p: Project) {
     def module: Project = p.in(file(p.id)).settings(stdSettings(p.id))

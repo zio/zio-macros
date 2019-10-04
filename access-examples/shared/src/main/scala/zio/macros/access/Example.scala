@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package zio.macros.mock
+package zio.macros.access
 
-import zio.ZIO
-import zio.test.mock.Method
+import zio.{URIO, ZIO}
 
-@Mockable
-trait Sys {
+@Accessable
+trait Example {
 
-  val sys: Sys.Service[Any]
+  val example: Example.Service[Any]
 }
 
-object Sys {
+object Example {
 
   val preValue: Int = 42
 
@@ -38,21 +37,24 @@ object Sys {
     def clear2: ZIO[R, Nothing, Unit]
     val clear3: ZIO[R, Nothing, Unit]
     def overloaded(value: Int): ZIO[R, Nothing, String]
+    def overloaded(value: Long): ZIO[R, Nothing, String]
   }
 
   val postValue: Int = 42
 }
 
-object ValidateMockable {
+object ValidateAccessable {
   // if macro expands correctly code below should compile
-  val get: Method[Int, String]                  = Sys.Service.get
-  val set: Method[(Int, String), Unit]          = Sys.Service.set
-  val getAndSet: Method[(Int, String), String]  = Sys.Service.getAndSet
-  val getAndSet2: Method[(Int, String), String] = Sys.Service.getAndSet2
-  val clear: Method[Unit, Unit]                 = Sys.Service.clear
-  val clear2: Method[Unit, Unit]                = Sys.Service.clear2
-  val clear3: Method[Unit, Unit]                = Sys.Service.clear3
+  def get(id: Int): URIO[Example, String]                       = Example.>.get(id)
+  def set(id: Int, value: String): URIO[Example, Unit]          = Example.>.set(id, value)
+  def getAndSet(id: Int, value: String): URIO[Example, String]  = Example.>.getAndSet(id, value)
+  def getAndSet2(id: Int)(value: String): URIO[Example, String] = Example.>.getAndSet2(id)(value)
+  def clear(): URIO[Example, Unit]                              = Example.>.clear()
+  def clear2: URIO[Example, Unit]                               = Example.>.clear2
+  val clear3: URIO[Example, Unit]                               = Example.>.clear3
+  def overloaded(value: Int): URIO[Example, String]             = Example.>.overloaded(value)
+  def overloaded(value: Long): URIO[Example, String]            = Example.>.overloaded(value)
 
-  val preValue: Int  = Sys.preValue
-  val postValue: Int = Sys.postValue
+  val preValue: Int  = Example.preValue
+  val postValue: Int = Example.postValue
 }
