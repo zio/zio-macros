@@ -12,7 +12,7 @@ Learn more about ZIO at:
 
 Generates helpers to access service capabilities from anywhere.
 
-To use simply add `"dev.zio" %% "zio-macros-access" % "0.1.0"` to your `libraryDependencies`.
+To use simply add `"dev.zio" %% "zio-macros-access" % "<version>"` to your `libraryDependencies`.
 
 The `@Accessable` annotation can be used on _modules_ following the [module pattern](https://zio.dev/docs/howto/howto_use_module_pattern).
 
@@ -55,7 +55,7 @@ val myProgram =
 
 ## Mockable
 
-To use simply add `"dev.zio" %% "zio-macros-mock" % "0.1.0"` to your `libraryDependencies`.
+To use simply add `"dev.zio" %% "zio-macros-mock" % "<version>"` to your `libraryDependencies`.
 
 The `@Mockable` annotation can be used on _modules_ following the [module pattern](https://zio.dev/docs/howto/howto_use_module_pattern).
 
@@ -94,7 +94,7 @@ object Example {
       val example = new Service[Any] {
         def foo()                 : zio.IO[Nothing, Unit]   = mock(Service.foo)
         def bar(v1: Int, v2: Int) : zio.IO[Throwable, Int]  = mock(Service.bar, v1, v2)
-        def baz(v1: Int)(v2: Int) : zio.IO[Nothing, String]   = mock(Service.baz, v1, v2)
+        def baz(v1: Int)(v2: Int) : zio.IO[Nothing, String] = mock(Service.baz, v1, v2)
         def overloaded(v: Int)    : zio.IO[Nothing, String] = mock(Service.overloaded._0, v)
         def overloaded(v: Long)   : zio.IO[Nothing, String] = mock(Service.overloaded._1, v)
       }
