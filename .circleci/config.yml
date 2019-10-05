@@ -6,8 +6,8 @@ scala_211: &scala_211
 scala_212: &scala_212
   SCALA_VERSION: 2.12.8
 
-scala_213: &scala_213
-  SCALA_VERSION: 2.13.0
+#scala_213: &scala_213
+#  SCALA_VERSION: 2.13.0
 
 jdk_8: &jdk_8
   JDK_VERSION: 8
@@ -202,26 +202,12 @@ jobs:
 #      - <<: *scala_213
 #      - <<: *jdk_11
 
-  release_211:
-    <<: *release
-    <<: *machine_ubuntu
-    environment:
-      - <<: *scala_211
-      - <<: *jdk_8
-
-  release_212:
+  release:
     <<: *release
     <<: *machine_ubuntu
     environment:
       - <<: *scala_212
       - <<: *jdk_8
-
-#  release_213:
-#    <<: *release
-#    <<: *machine_ubuntu
-#    environment:
-#      - <<: *scala_213
-#      - <<: *jdk_8
 
 workflows:
   version: 2
@@ -303,7 +289,8 @@ workflows:
 #          filters:
 #            tags:
 #              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
-      - release_211:
+
+      - release:
           context: Sonatype
           requires:
             - test_211_jdk8_jvm
@@ -314,30 +301,8 @@ workflows:
             - test_212_jdk11_jvm
             - test_212_jdk8_js
             - test_212_jdk11_js
-#            - test_213_jdk8_jvm
-#            - test_213_jdk11_jvm
-#            - test_213_jdk8_js
-#            - test_213_jdk11_js
           filters:
             branches:
               ignore: /.*/
             tags:
               only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
-      - release_212:
-          context: Sonatype
-          requires:
-            - release_211
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
-#      - release_213:
-#          context: Sonatype
-#          requires:
-#            - release_212
-#          filters:
-#            branches:
-#              ignore: /.*/
-#            tags:
-#              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
