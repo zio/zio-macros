@@ -65,7 +65,6 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .in(file("core"))
   .settings(stdSettings("zio-macros-core"))
   .settings(macroSettings())
-  .settings(skip in publish := true)
 
 lazy val access = crossProject(JSPlatform, JVMPlatform)
   .in(file("access"))
