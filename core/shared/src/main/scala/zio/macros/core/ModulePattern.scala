@@ -117,7 +117,7 @@ private[macros] trait ModulePattern {
   protected def extractService(body: List[Tree]): ServiceSummary =
     body.indexWhere {
       case ClassDef(_, name, _, _) => name.toTermName.toString == "Service"
-      case _                                                => false
+      case _                       => false
     } match {
       case idx if idx >= 0 =>
         val (prevSiblings, service :: nextSiblings) = body.splitAt(idx)

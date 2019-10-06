@@ -10,7 +10,7 @@ object BuildHelper {
   val zioVersion = "1.0.0-RC14"
 
   private val testDeps = Seq(
-    "org.scalatest"   %% "scalatest"    % "3.0.8" % "test"
+    "org.scalatest" %% "scalatest" % "3.0.8" % "test"
   )
 
   private def compileOnlyDeps(scalaVersion: String) = {
