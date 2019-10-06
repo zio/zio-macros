@@ -102,8 +102,12 @@ lazy val delegate = crossProject(JSPlatform, JVMPlatform)
   .settings(stdSettings("zio-macros-delegate"))
   .settings(macroSettings())
   .settings(
-    scalacOptions --= Seq("-deprecation"),
-    scalacOptions ++= Seq("-Ywarn-unused:-patvars,-explicits,_")
+    scalacOptions ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, x)) if x <= 11 => Seq("-Ywarn-unused:false")
+        case _                       => Seq("-Ywarn-unused:-patvars,-explicits,_")
+      }
+    }
   )
 
 lazy val delegateTests = crossProject(JSPlatform, JVMPlatform)
@@ -112,16 +116,16 @@ lazy val delegateTests = crossProject(JSPlatform, JVMPlatform)
   .settings(stdSettings("zio-macros-delegate-tests"))
   .settings(
     skip in publish := true,
-    scalacOptions ++= Seq("-Ywarn-unused:-explicits,_")
+    scalacOptions ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, x)) if x <= 11 => Seq("-Ywarn-unused:false")
+        case _                       => Seq("-Ywarn-unused:-explicits,_")
+      }
+    }
   )
 
 lazy val delegateExamples = crossProject(JSPlatform, JVMPlatform)
   .in(file("delegate-examples"))
   .dependsOn(delegate)
   .settings(stdSettings("zio-macros-delegate-examples"))
-  .settings(
-    skip in publish := true,
-    libraryDependencies ++= Seq(
-      "dev.zio" %% "zio" % "1.0.0-RC14"
-    )
-  )
+  .settings(examplesSettings())
