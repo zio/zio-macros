@@ -22,7 +22,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
 @compileTimeOnly("enable macro paradise to expand macro annotations")
-class Mockable() extends StaticAnnotation {
+class mockable() extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro MockableMacro.apply
 }
 
@@ -79,9 +79,9 @@ private[mock] class MockableMacro(val c: Context) extends ModulePattern {
     capabilities
       .groupBy(_.name)
       .collect {
-        case (name, capability :: Nil) =>
+        case (_, capability :: Nil) =>
           List(generateCapabilityMock(capability, None))
-        case (name, overloads) =>
+        case (_, overloads) =>
           overloads.zipWithIndex.map {
             case (capability, idx) =>
               val idxName = TermName(s"_$idx")

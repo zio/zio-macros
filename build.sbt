@@ -122,6 +122,6 @@ lazy val delegateExamples = crossProject(JSPlatform, JVMPlatform)
   .settings(
     skip in publish := true,
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio" % "1.0.0-RC11-1"
+      "dev.zio" %% "zio" % "1.0.0-RC14"
     )
   )

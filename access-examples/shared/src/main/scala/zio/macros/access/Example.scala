@@ -17,7 +17,7 @@ package zio.macros.access
 
 import zio.{ URIO, ZIO }
 
-@Accessable
+@accessable
 trait Example {
 
   val example: Example.Service[Any]
