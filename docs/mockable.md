@@ -7,9 +7,9 @@ The `@mockable` annotation can be used on _modules_ following the [module patter
 When applied to the _module_ it will autogenerate the `Service` companion object with _capability tags_ and the mockable implementation:
 
 ```scala
-import zio.macros.mock.Mockable
+import zio.macros.mock.mockable
 
-@Mockable
+@mockable
 trait Example {
   val example: Example.Service[Any]
 }

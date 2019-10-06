@@ -48,30 +48,33 @@ object BuildHelper {
       "-Ywarn-value-discard"
     )
 
-    def optimizerOptions(optimize: Boolean) =
+    val optimizerOptions =
       if (optimize)
         Seq(
           "-opt:l:inline"
         )
-      else Nil
+      else Seq.empty
 
-    CrossVersion.partialVersion(scalaVersion) match {
+    val extraOptions = CrossVersion.partialVersion(scalaVersion) match {
       case Some((2, 13)) =>
-        Seq(
-          "-Ymacro-annotations"
-        ) ++ stdOptions ++ optimizerOptions(optimize)
-      case Some((2, 12)) =>
         Seq(
           "-opt-warnings",
           "-Ywarn-extra-implicit",
           "-Ywarn-unused",
+          "-Ymacro-annotations"
+        )
+      case Some((2, 12)) =>
+        Seq(
           "-Ypartial-unification",
+          "-opt-warnings",
+          "-Ywarn-extra-implicit",
+          "-Ywarn-unused",
           "-Yno-adapted-args",
           "-Ywarn-inaccessible",
           "-Ywarn-infer-any",
           "-Ywarn-nullary-override",
           "-Ywarn-nullary-unit"
-        ) ++ stdOptions ++ optimizerOptions(optimize)
+        )
       case Some((2, 11)) =>
         Seq(
           "-Ypartial-unification",
@@ -82,9 +85,11 @@ object BuildHelper {
           "-Ywarn-nullary-unit",
           "-Xexperimental",
           "-Ywarn-unused-import"
-        ) ++ stdOptions
+        )
       case _ => Seq.empty
     }
+
+    stdOptions ++ extraOptions ++ optimizerOptions
   }
 
   val buildInfoSettings = Seq(
