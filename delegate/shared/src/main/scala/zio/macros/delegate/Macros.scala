@@ -186,7 +186,7 @@ private[delegate] class Macros(val c: Context) {
     val rType = m.returnType
     val mods  = if (!m.method.isAbstract) Modifiers(Flag.OVERRIDE) else Modifiers()
 
-    if (m.method.paramss.isEmpty) {
+    if (m.method.paramLists.isEmpty) {
       q"$mods val $name: $rType = $to.$name"
     } else {
       val typeParams = m.typeParams.map(internal.typeDef(_))
