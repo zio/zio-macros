@@ -18,7 +18,7 @@ package zio.macros.mock
 import zio.ZIO
 import zio.test.mock.Method
 
-@Mockable
+@mockable
 trait Example {
 
   val example: Example.Service[Any]

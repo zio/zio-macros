@@ -38,8 +38,8 @@ ThisBuild / publishTo := sonatypePublishToBundle.value
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
-addCommandAlias("testJVM", ";accessExamplesJVM/test;mockExamplesJVM/test")
-addCommandAlias("testJS", ";accessExamplesJS/test;mockExamplesJS/test")
+addCommandAlias("testJVM", ";accessExamplesJVM/test;mockExamplesJVM/test;delegateTestsJVM/test")
+addCommandAlias("testJS", ";accessExamplesJS/test;mockExamplesJS/test;delegateTestsJS/test")
 
 lazy val root = project
   .in(file("."))
@@ -57,7 +57,13 @@ lazy val root = project
     mock.jvm,
     mock.js,
     mockExamples.jvm,
-    mockExamples.js
+    mockExamples.js,
+    delegate.jvm,
+    delegate.js,
+    delegateTests.jvm,
+    delegateTests.js,
+    delegateExamples.jvm,
+    delegateExamples.js
   )
   .enablePlugins(ScalaJSPlugin)
 
@@ -89,4 +95,37 @@ lazy val mockExamples = crossProject(JSPlatform, JVMPlatform)
   .in(file("mock-examples"))
   .dependsOn(mock)
   .settings(stdSettings("zio-macros-mock-examples"))
+  .settings(examplesSettings())
+
+lazy val delegate = crossProject(JSPlatform, JVMPlatform)
+  .in(file("delegate"))
+  .settings(stdSettings("zio-macros-delegate"))
+  .settings(macroSettings())
+  .settings(
+    scalacOptions ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, x)) if x <= 11 => Seq("-Ywarn-unused:false")
+        case _                       => Seq("-Ywarn-unused:-patvars,-explicits,_")
+      }
+    }
+  )
+
+lazy val delegateTests = crossProject(JSPlatform, JVMPlatform)
+  .in(file("delegate-tests"))
+  .dependsOn(delegate)
+  .settings(stdSettings("zio-macros-delegate-tests"))
+  .settings(
+    skip in publish := true,
+    scalacOptions ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, x)) if x <= 11 => Seq("-Ywarn-unused:false")
+        case _                       => Seq("-Ywarn-unused:-explicits,_")
+      }
+    }
+  )
+
+lazy val delegateExamples = crossProject(JSPlatform, JVMPlatform)
+  .in(file("delegate-examples"))
+  .dependsOn(delegate)
+  .settings(stdSettings("zio-macros-delegate-examples"))
   .settings(examplesSettings())

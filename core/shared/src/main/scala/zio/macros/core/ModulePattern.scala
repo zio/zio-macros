@@ -83,7 +83,7 @@ private[macros] trait ModulePattern {
     module match {
       case q"$mods trait $moduleName[..$typeParams] extends { ..$earlyDefinitions } with ..$parents { $self => ..$body }" =>
         body.indexWhere {
-          case ValDef(mods, name, typeTree, rhs) =>
+          case ValDef(_, name, typeTree, _) =>
             val moduleTerm = moduleName.toTermName
             name.toString.capitalize == moduleTerm.toString && typeTree.toString == s"$moduleTerm.Service[Any]"
           case _ => false
@@ -116,8 +116,8 @@ private[macros] trait ModulePattern {
 
   protected def extractService(body: List[Tree]): ServiceSummary =
     body.indexWhere {
-      case ClassDef(mods, name, typeParams, implementation) => name.toTermName.toString == "Service"
-      case _                                                => false
+      case ClassDef(_, name, _, _) => name.toTermName.toString == "Service"
+      case _                       => false
     } match {
       case idx if idx >= 0 =>
         val (prevSiblings, service :: nextSiblings) = body.splitAt(idx)
