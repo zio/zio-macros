@@ -47,7 +47,7 @@ class DelegateSpec extends UnitSpec {
         assert((new Bar(new Foo {})).a == 3)
       }
     }
-    // TODO: this currently causes compiler stackoverflow :(
+    // TODO: this is an example that triggers this issue https://github.com/milessabin/shapeless/issues/614
     //     it("should handle locally visible symbols") {
     //       object Test {
     //         trait Foo {
@@ -105,7 +105,7 @@ class DelegateSpec extends UnitSpec {
         assert((new Baz(new Bar {})).a == 1)
       }
     }
-    // TODO:
+    // TODO: test case for https://github.com/zio/zio-macros/issues/17
     // it("should handle type parameters on resulting class") {
     //   trait Foo[A] {
     //     def a: A
