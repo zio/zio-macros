@@ -40,6 +40,7 @@ addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
 addCommandAlias("testJVM", ";accessExamplesJVM/test;mockExamplesJVM/test;delegateTestsJVM/test")
 addCommandAlias("testJS", ";accessExamplesJS/test;mockExamplesJS/test;delegateTestsJS/test")
+addCommandAlias("testRelease", ";set every isSnapshot := false;+clean;+compile")
 
 lazy val root = project
   .in(file("."))
