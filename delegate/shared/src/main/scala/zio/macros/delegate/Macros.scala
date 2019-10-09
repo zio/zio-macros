@@ -139,7 +139,6 @@ private[delegate] class Macros(val c: Context) {
         )
         .toSet
 
-      // TODO: get traits even if this takes type parameters
       val (toName, toType) = typeCheckVal(delegateTo)
         .fold(e => abort(s"Failed typechecking annotated member. Is it defined in local scope?: $e"), identity)
 
