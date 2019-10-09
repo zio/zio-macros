@@ -62,7 +62,7 @@ object BuildHelper {
           "-Ywarn-extra-implicit",
           "-Ywarn-unused",
           "-Ymacro-annotations"
-        )
+        ) ++ optimizerOptions
       case Some((2, 12)) =>
         Seq(
           "-Ypartial-unification",
@@ -74,7 +74,7 @@ object BuildHelper {
           "-Ywarn-infer-any",
           "-Ywarn-nullary-override",
           "-Ywarn-nullary-unit"
-        )
+        ) ++ optimizerOptions
       case Some((2, 11)) =>
         Seq(
           "-Ypartial-unification",
@@ -89,7 +89,7 @@ object BuildHelper {
       case _ => Seq.empty
     }
 
-    stdOptions ++ extraOptions ++ optimizerOptions
+    stdOptions ++ extraOptions
   }
 
   val buildInfoSettings = Seq(
