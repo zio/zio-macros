@@ -1,17 +1,17 @@
-## @accessable annotation
+## @accessible annotation
 
 Generates helpers to access service capabilities from anywhere.
 
 To use simply add `"dev.zio" %% "zio-macros-access" % "<version>"` to your `libraryDependencies`.
 
-The `@accessable` annotation can be used on _modules_ following the [module pattern](https://zio.dev/docs/howto/howto_use_module_pattern).
+The `@accessible` annotation can be used on _modules_ following the [module pattern](https://zio.dev/docs/howto/howto_use_module_pattern).
 
 When applied to the _module_ it will autogenerate the `>` container in module's compation object with helpers to access service capabilities:
 
 ```scala
-import zio.macros.access.accessable
+import zio.macros.access.accessible
 
-@accessable
+@accessible
 trait Example {
   val example: Example.Service[Any]
 }

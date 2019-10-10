@@ -17,7 +17,7 @@ package zio.macros.access
 
 import zio.{ URIO, ZIO }
 
-@accessable
+@accessible
 trait Example {
 
   val example: Example.Service[Any]
@@ -43,7 +43,7 @@ object Example {
   val postValue: Int = 42
 }
 
-object ValidateAccessable {
+object ValidateAccessible {
   // if macro expands correctly code below should compile
   def get(id: Int): URIO[Example, String]                       = Example.>.get(id)
   def set(id: Int, value: String): URIO[Example, Unit]          = Example.>.set(id, value)
