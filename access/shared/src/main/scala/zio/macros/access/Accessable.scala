@@ -22,11 +22,11 @@ import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
 @compileTimeOnly("enable macro paradise to expand macro annotations")
-class accessable() extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro AccessableMacro.apply
+class accessible() extends StaticAnnotation {
+  def macroTransform(annottees: Any*): Any = macro AccessibleMacro.apply
 }
 
-private[access] class AccessableMacro(val c: Context) extends ModulePattern {
+private[access] class AccessibleMacro(val c: Context) extends ModulePattern {
   import c.universe._
 
   def apply(annottees: c.Tree*): c.Tree = {
