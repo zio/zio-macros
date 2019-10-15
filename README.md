@@ -13,10 +13,10 @@ Learn more about ZIO at:
 This project is a loose collection of different macro-based solutions to simplify your code. Head to the specific docs to
 learn more about the ones that interest you.
 
-- [Accessible](docs/accessible.md) - Generate public accessors for ZIO services.
-- [Mockable](docs/mockable.md) - Automatically derive mockable implementations for your services.
-- [Delegate](docs/delegate.md) - Generate proxies for arbitrary traits / classes.
-- [Mix](docs/mix.md) - Derive rules to combine instances of traits into a compound type.
+- [accessible](docs/accessible.md) - Generate public accessors for ZIO services.
+- [mockable](docs/mockable.md) - Automatically derive mockable implementations for your services.
+- [delegate](docs/delegate.md) - Generate proxies for arbitrary traits / classes.
+- [mix](docs/mix.md) - Derive rules to combine instances of traits into a compound type.
 
 ## Installation
 All subprojects ship at their own coordinates. Add the relevant dependencies to your build.
