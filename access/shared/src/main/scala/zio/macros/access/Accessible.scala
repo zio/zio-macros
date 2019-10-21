@@ -51,15 +51,15 @@ private[access] class AccessibleMacro(val c: Context) extends ModulePattern {
   ): List[Tree] = {
     val moduleType = module.name
     capabilities.map {
-      case Capability(name, None, _, e, a) =>
-        q"val $name: _root_.zio.IO[$e, $a] = _root_.zio.ZIO.accessM { case env: $moduleType => env.$serviceName.$name }"
-      case Capability(name, Some(Nil), _, e, a) =>
-        q"def $name: _root_.zio.IO[$e, $a] = _root_.zio.ZIO.accessM { case env: $moduleType => env.$serviceName.$name }"
-      case Capability(name, Some(List(Nil)), _, e, a) =>
-        q"def $name(): _root_.zio.IO[$e, $a] = _root_.zio.ZIO.accessM { case env: $moduleType => env.$serviceName.$name }"
-      case Capability(name, Some(argLists), _, e, a) =>
+      case Capability(name, None, r, e, a) =>
+        q"val $name: _root_.zio.ZIO[$r, $e, $a] = _root_.zio.ZIO.accessM { case env: $moduleType => env.$serviceName.$name }"
+      case Capability(name, Some(Nil), r, e, a) =>
+        q"def $name: _root_.zio.ZIO[$r, $e, $a] = _root_.zio.ZIO.accessM { case env: $moduleType => env.$serviceName.$name }"
+      case Capability(name, Some(List(Nil)), r, e, a) =>
+        q"def $name(): _root_.zio.ZIO[$r, $e, $a] = _root_.zio.ZIO.accessM { case env: $moduleType => env.$serviceName.$name }"
+      case Capability(name, Some(argLists), r, e, a) =>
         val argNames = argLists.map(_.map(_.name))
-        q"def $name(...$argLists): _root_.zio.IO[$e, $a] = _root_.zio.ZIO.accessM { case env: $moduleType => env.$serviceName.$name(...$argNames) }"
+        q"def $name(...$argLists): _root_.zio.ZIO[$r, $e, $a] = _root_.zio.ZIO.accessM { case env: $moduleType => env.$serviceName.$name(...$argNames) }"
     }
   }
 
