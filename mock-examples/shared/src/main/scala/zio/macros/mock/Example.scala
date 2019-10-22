@@ -46,15 +46,15 @@ object Example {
 
 object ValidateMockable {
   // if macro expands correctly code below should compile
-  val get: Method[Int, String]                  = Example.Service.get
-  val set: Method[(Int, String), Unit]          = Example.Service.set
-  val getAndSet: Method[(Int, String), String]  = Example.Service.getAndSet
-  val getAndSet2: Method[(Int, String), String] = Example.Service.getAndSet2
-  val clear: Method[Unit, Unit]                 = Example.Service.clear
-  val clear2: Method[Unit, Unit]                = Example.Service.clear2
-  val clear3: Method[Unit, Unit]                = Example.Service.clear3
-  val overloaded0: Method[Int, String]          = Example.Service.overloaded._0
-  val overloaded1: Method[Long, String]         = Example.Service.overloaded._1
+  val get: Method[Int, String]                  = Example.get
+  val set: Method[(Int, String), Unit]          = Example.set
+  val getAndSet: Method[(Int, String), String]  = Example.getAndSet
+  val getAndSet2: Method[(Int, String), String] = Example.getAndSet2
+  val clear: Method[Unit, Unit]                 = Example.clear
+  val clear2: Method[Unit, Unit]                = Example.clear2
+  val clear3: Method[Unit, Unit]                = Example.clear3
+  val overloaded0: Method[Int, String]          = Example.overloaded._0
+  val overloaded1: Method[Long, String]         = Example.overloaded._1
 
   val preValue: Int  = Example.preValue
   val postValue: Int = Example.postValue
