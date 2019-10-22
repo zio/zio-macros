@@ -125,24 +125,24 @@ private[mock] class MockableMacro(val c: Context) extends ModulePattern {
     capabilityMocks: List[Tree]
   ): Tree =
     q"""
-      object ${companion.name} {
+       object ${companion.name} {
 
-        ..${service.previousSiblings}
+         ..${service.previousSiblings}
 
-       trait Service[R] {
-         ..${service.body}
+         trait Service[R] {
+           ..${service.body}
+         }
+
+         ..$capabilityTags
+
+         implicit val mockable: _root_.zio.test.mock.Mockable[${module.name}] = (mock: _root_.zio.test.mock.Mock) =>
+           new ${module.name} {
+             val ${module.serviceName} = new Service[Any] {
+               ..$capabilityMocks
+             }
+           }
+
+         ..${service.nextSiblings}
        }
-
-        ..$capabilityTags
-
-      implicit val mockable: _root_.zio.test.mock.Mockable[${module.name}] = (mock: _root_.zio.test.mock.Mock) =>
-        new ${module.name} {
-          val ${module.serviceName} = new Service[Any] {
-            ..$capabilityMocks
-          }
-        }
-
-        ..${service.nextSiblings}
-      }
-    """
+     """
 }
