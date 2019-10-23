@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package zio.macros.delegate
 
-import zio.clock.Clock
+import zio._
 
-object PatchExample {
+final class EnrichWith[B](private[this] val b: B) {
+  def enrichZIO[R, E, A](zio: ZIO[R, E, A])(implicit ev: A Mix B): ZIO[R, E, A with B] = zio.map(ev.mix(_, b))
 
-  type ZEnv = zio.DefaultRuntime#Environment
-
-  val mapClock: (Clock.Service[Any] => Clock.Service[Any]) => ZEnv => ZEnv =
-    f => patch[ZEnv, Clock].apply(c => new Clock { val clock = f(c.clock) })
+  def enrichZManaged[R, E, A](zManaged: ZManaged[R, E, A])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
+    zManaged.map(ev.mix(_, b))
 }
