@@ -2,7 +2,7 @@
 
 Derive rules to combine instances of traits into a compound type.
 
-To use simply add `"dev.zio" %% "zio-macros-delegate" % "<version>"` to your `libraryDependencies`.
+To use simply add `"dev.zio" %% "zio-macros-core" % "<version>"` to your `libraryDependencies`.
 
 An instance of
 ```scala

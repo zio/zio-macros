@@ -2,7 +2,7 @@
 
 Generates helpers to access service capabilities from anywhere.
 
-To use simply add `"dev.zio" %% "zio-macros-access" % "<version>"` to your `libraryDependencies`.
+To use simply add `"dev.zio" %% "zio-macros-core" % "<version>"` to your `libraryDependencies`.
 
 The `@accessible` annotation can be used on _modules_ following the [module pattern](https://zio.dev/docs/howto/howto_use_module_pattern).
 

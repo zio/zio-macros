@@ -2,7 +2,7 @@
 
 Generate proxies for arbitrary traits / classes.
 
-To use simply add `"dev.zio" %% "zio-macros-delegate" % "<version>"` to your `libraryDependencies`.
+To use simply add `"dev.zio" %% "zio-macros-core" % "<version>"` to your `libraryDependencies`.
 
 This annotation can only be used on a  constructur parameter in a class definition.
 This will do a number of things to the resulting class definitions:

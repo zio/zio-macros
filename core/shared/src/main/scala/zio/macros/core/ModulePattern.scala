@@ -15,6 +15,7 @@
  */
 package zio.macros.core
 
+import com.github.ghik.silencer.silent
 import scala.reflect.macros.whitebox.Context
 
 private[macros] trait ModulePattern {
@@ -79,6 +80,7 @@ private[macros] trait ModulePattern {
       case _ => abort("Module trait and companion object pair not found")
     }
 
+  @silent("pattern var [^\\s]+ in method unapply is never used")
   protected def extractModule(module: ClassDef): ModuleSummary =
     module match {
       case q"$mods trait $moduleName[..$typeParams] extends { ..$earlyDefinitions } with ..$parents { $self => ..$body }" =>
@@ -89,7 +91,7 @@ private[macros] trait ModulePattern {
           case _ => false
         } match {
           case idx if idx >= 0 =>
-            val (prevSiblings, service :: nextSiblings) = body.splitAt(idx)
+            val (prevSiblings, service, nextSiblings) = siblings(body, idx)
             ModuleSummary(
               prevSiblings,
               nextSiblings,
@@ -107,6 +109,7 @@ private[macros] trait ModulePattern {
       case _ => abort("Could not extract module trait")
     }
 
+  @silent("pattern var [^\\s]+ in method unapply is never used")
   protected def extractCompanion(companion: ModuleDef): CompanionSummary =
     companion match {
       case q"$mods object $name extends { ..$earlyDefinitions } with ..$parents { $self => ..$body }" =>
@@ -114,13 +117,14 @@ private[macros] trait ModulePattern {
       case _ => abort("Count not extract module companion")
     }
 
+  @silent("pattern var [^\\s]+ in method unapply is never used")
   protected def extractService(body: List[Tree]): ServiceSummary =
     body.indexWhere {
       case ClassDef(_, name, _, _) => name.toTermName.toString == "Service"
       case _                       => false
     } match {
       case idx if idx >= 0 =>
-        val (prevSiblings, service :: nextSiblings) = body.splitAt(idx)
+        val (prevSiblings, service, nextSiblings) = siblings(body, idx)
         service match {
           case q"$mods trait Service[..$typeParams] extends { ..$earlyDefinitions } with ..$parents { $self => ..$body }" =>
             ServiceSummary(prevSiblings, service, nextSiblings, mods, typeParams, earlyDefinitions, parents, self, body)
@@ -138,6 +142,12 @@ private[macros] trait ModulePattern {
       case ValDef(_, termName, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), _) if term.toString == "ZIO" =>
         Capability(termName, None, r, e, a)
     }
+
+  @silent("match may not be exhaustive")
+  protected def siblings(list: List[Tree], idx: Int): (List[Tree], Tree, List[Tree]) = {
+    val (prev, at :: next) = list.splitAt(idx)
+    (prev, at, next)
+  }
 
   protected def abort(details: String) = {
     val error =

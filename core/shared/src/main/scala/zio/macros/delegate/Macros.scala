@@ -15,6 +15,7 @@
  */
 package zio.macros.delegate
 
+import com.github.ghik.silencer.silent
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.macros.TypecheckException
 
@@ -101,6 +102,7 @@ private[delegate] class Macros(val c: Context) {
     """
   }
 
+  @silent("pattern var [^\\s]+ in method unapply is never used")
   def delegateImpl(annottees: c.Expr[Any]*): c.Tree = {
 
     case class Arguments(verbose: Boolean, forwardObjectMethods: Boolean, generateTraits: Boolean)
@@ -217,6 +219,7 @@ private[delegate] class Macros(val c: Context) {
     loop(t.baseClasses.map(_.asClass)).toSet
   }
 
+  @silent("method right in class Either is deprecated")
   final private[this] val typeCheckVal: ValDef => Either[TypecheckException, (TermName, Type)] = {
     case ValDef(_, tname, tpt, _) =>
       typeCheckTree(tpt).right.map((tname, _))
@@ -229,6 +232,7 @@ private[delegate] class Macros(val c: Context) {
       case e: TypecheckException => Left(e)
     }
 
+  @silent("method enclosing(Class|Package) in trait Enclosures is deprecated")
   final private[this] val enclosing: String = c.enclosingClass match {
     case clazz if clazz.isEmpty => c.enclosingPackage.symbol.fullName
     case clazz                  => clazz.symbol.fullName

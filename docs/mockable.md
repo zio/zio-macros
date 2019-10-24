@@ -1,6 +1,6 @@
 ## @mockable annotation
 
-To use simply add `"dev.zio" %% "zio-macros-mock" % "<version>"` to your `libraryDependencies`.
+To use simply add `"dev.zio" %% "zio-macros-test" % "<version>"` to your `libraryDependencies`.
 
 The `@mockable` annotation can be used on _modules_ following the [module pattern](https://zio.dev/docs/howto/howto_use_module_pattern).
 
