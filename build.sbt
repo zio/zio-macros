@@ -53,6 +53,8 @@ lazy val root = project
     core.js,
     coreExamples.jvm,
     coreExamples.js,
+    coreTests.jvm,
+    coreTests.js,
     test.jvm,
     test.js,
     testExamples.jvm,
