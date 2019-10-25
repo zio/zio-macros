@@ -16,6 +16,8 @@
 
 package zio.macros
 
+import zio._
+
 package object delegate {
 
   /**
@@ -24,4 +26,44 @@ package object delegate {
   def patch[A, B](implicit ev: A Mix B): (B => B) => A with B => A with B =
     f => old => ev.mix(old, f(old))
 
+  /**
+   * Create a function that can be used to enrich ZIO or ZManaged with the mixed in trait instance.
+   */
+  def enrichWith[A](a: A): EnrichWith[A] = new EnrichWith(a)
+
+  /**
+   * Create a function that can be used to enrich ZIO or ZManaged with the mixed in effectfully created trait instance.
+   * The generating effect can use the output of the effect that will be mixed into.
+   */
+  def enrichWithM[A]: EnrichWithM.PartiallyApplied[A] = new EnrichWithM.PartiallyApplied
+
+  /**
+   * Create a function that can be used to enrich ZIO or ZManaged with the mixed in effectfully created trait instance.
+   * The generating effect can use the output of the effect that will be mixed into.
+   */
+  def enrichWithManaged[A]: EnrichWithManaged.PartiallyApplied[A] = new EnrichWithManaged.PartiallyApplied
+
+  implicit class ZIOSyntax[R, E, A](zio: ZIO[R, E, A]) {
+
+    def >>+[B](enrichWith: EnrichWith[B])(implicit ev: A Mix B): ZIO[R, E, A with B] =
+      enrichWith.enrichZIO[R, E, A](zio)
+
+    def >>+[B](enrichWithM: EnrichWithM[A, E, B])(implicit ev: A Mix B): ZIO[R, E, A with B] =
+      enrichWithM.enrichZIO[R, E, A](zio)
+
+    def >>+[B](enrichWithManaged: EnrichWithManaged[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
+      enrichWithManaged.enrichZManaged[R, E, A](zio.toManaged_)
+  }
+
+  implicit class ZManagedSyntax[R, E, A](zManaged: ZManaged[R, E, A]) {
+
+    def >>+[B](enrichWith: EnrichWith[B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
+      enrichWith.enrichZManaged[R, E, A](zManaged)
+
+    def >>+[B](enrichWithM: EnrichWithM[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
+      enrichWithM.enrichZManaged[R, E, A](zManaged)
+
+    def >>+[B](enrichWithManaged: EnrichWithManaged[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
+      enrichWithManaged.enrichZManaged[R, E, A](zManaged)
+  }
 }

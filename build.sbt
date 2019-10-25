@@ -66,6 +66,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .in(file("core"))
   .settings(stdSettings("zio-macros-core"))
   .settings(macroSettings())
+  .settings(libraryDependencies += "dev.zio" %% "zio" % zioVersion)
 
 lazy val coreExamples = crossProject(JSPlatform, JVMPlatform)
   .in(file("core-examples"))
