@@ -65,10 +65,12 @@ private[macros] trait ModulePattern {
 
   protected case class Capability(
     name: TermName,
+    mods: Modifiers,
     argLists: Option[List[List[ValDef]]],
     env: Tree,
     error: Tree,
-    value: Tree
+    value: Tree,
+    impl: Tree
   )
 
   protected def extractTrees(annottees: Seq[c.Tree]): TreesSummary =
@@ -135,12 +137,12 @@ private[macros] trait ModulePattern {
 
   protected def extractCapabilities(service: ServiceSummary): List[Capability] =
     service.body.collect {
-      case DefDef(_, termName, _, argLists, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), _)
+      case DefDef(mods, termName, _, argLists, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), impl)
           if term.toString == "ZIO" =>
-        Capability(termName, Some(argLists), r, e, a)
+        Capability(termName, mods, Some(argLists), r, e, a, impl)
 
-      case ValDef(_, termName, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), _) if term.toString == "ZIO" =>
-        Capability(termName, None, r, e, a)
+      case ValDef(mods, termName, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), impl) if term.toString == "ZIO" =>
+        Capability(termName, mods, None, r, e, a, impl)
     }
 
   @silent("match may not be exhaustive")
