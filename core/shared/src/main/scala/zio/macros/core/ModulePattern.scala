@@ -18,7 +18,7 @@ package zio.macros.core
 import com.github.ghik.silencer.silent
 import scala.reflect.macros.whitebox.Context
 
-private[macros] trait ModulePattern {
+private[macros] trait ModulePattern extends ZIOExtractor {
 
   val c: Context
 
@@ -135,11 +135,10 @@ private[macros] trait ModulePattern {
 
   protected def extractCapabilities(service: ServiceSummary): List[Capability] =
     service.body.collect {
-      case DefDef(_, termName, _, argLists, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), _)
-          if term.toString == "ZIO" =>
+      case DefDef(_, termName, _, argLists, ZIO(r, e, a), _) =>
         Capability(termName, Some(argLists), r, e, a)
 
-      case ValDef(_, termName, AppliedTypeTree(Ident(term), r :: e :: a :: Nil), _) if term.toString == "ZIO" =>
+      case ValDef(_, termName, ZIO(r, e, a), _) =>
         Capability(termName, None, r, e, a)
     }
 

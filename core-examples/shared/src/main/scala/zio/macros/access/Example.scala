@@ -15,7 +15,7 @@
  */
 package zio.macros.access
 
-import zio.{ URIO, ZIO }
+import zio.{ RIO, URIO, ZIO }
 
 @accessible
 trait Example {
@@ -38,6 +38,8 @@ object Example {
     val clear3: ZIO[R, Nothing, Unit]
     def overloaded(value: Int): ZIO[R, Nothing, String]
     def overloaded(value: Long): ZIO[R, Nothing, String]
+    val rio: RIO[R, String]
+    val urio: URIO[R, String]
   }
 
   val postValue: Int = 42
@@ -54,6 +56,8 @@ object ValidateAccessible {
   val clear3: URIO[Example, Unit]                               = Example.>.clear3
   def overloaded(value: Int): URIO[Example, String]             = Example.>.overloaded(value)
   def overloaded(value: Long): URIO[Example, String]            = Example.>.overloaded(value)
+  val rio: RIO[Example, String]                                 = Example.>.rio
+  val urio: URIO[Example, String]                               = Example.>.urio
 
   val preValue: Int  = Example.preValue
   val postValue: Int = Example.postValue

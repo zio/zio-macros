@@ -15,7 +15,7 @@
  */
 package zio.macros.mock
 
-import zio.ZIO
+import zio.{ RIO, URIO, ZIO }
 import zio.test.mock.Method
 
 @mockable
@@ -39,6 +39,8 @@ object Example {
     val clear3: ZIO[R, Nothing, Unit]
     def overloaded(value: Int): ZIO[R, Nothing, String]
     def overloaded(value: Long): ZIO[R, Nothing, String]
+    val rio: RIO[R, String]
+    val urio: URIO[R, String]
   }
 
   val postValue: Int = 42
@@ -55,6 +57,8 @@ object ValidateMockable {
   val clear3: Method[Unit, Unit]                = Example.clear3
   val overloaded0: Method[Int, String]          = Example.overloaded._0
   val overloaded1: Method[Long, String]         = Example.overloaded._1
+  val rio: Method[Unit, String]                 = Example.rio
+  val urio: Method[Unit, String]                = Example.urio
 
   val preValue: Int  = Example.preValue
   val postValue: Int = Example.postValue
