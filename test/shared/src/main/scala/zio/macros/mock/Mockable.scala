@@ -99,21 +99,31 @@ private[mock] class MockableMacro(val c: Context) extends ModulePattern {
     capability: Capability,
     overloadIndex: Option[TermName]
   ): Tree = {
+    val (name, e, a) = (capability.name, capability.error, capability.value)
     val tag = overloadIndex match {
       case Some(index) => q"${companion.name}.${capability.name}.$index"
       case None        => q"${companion.name}.${capability.name}"
     }
 
-    capability match {
-      case Capability(name, None, _, e, a) =>
-        q"val $name: _root_.zio.IO[$e, $a] = mock($tag)"
-      case Capability(name, Some(Nil), _, e, a) =>
-        q"def $name: _root_.zio.IO[$e, $a] = mock($tag)"
-      case Capability(name, Some(List(Nil)), _, e, a) =>
-        q"def $name(): _root_.zio.IO[$e, $a] = mock($tag)"
-      case Capability(name, Some(argLists), _, e, a) =>
-        val argNames = argLists.flatten.map(_.name)
-        q"def $name(...$argLists): _root_.zio.IO[$e, $a] = mock($tag, ..$argNames)"
+    val mods =
+      if (capability.impl == EmptyTree) Modifiers(Flag.FINAL)
+      else Modifiers(Flag.FINAL | Flag.OVERRIDE)
+
+    val returnType = tq"_root_.zio.IO[$e, $a]"
+    val returnValue =
+      capability.argLists match {
+        case Some(argLists) if argLists.flatten.nonEmpty =>
+          val argNames = argLists.flatten.map(_.name)
+          q"mock($tag, ..$argNames)"
+        case _ =>
+          q"mock($tag)"
+      }
+
+    capability.argLists match {
+      case None            => q"$mods val $name: $returnType = $returnValue"
+      case Some(Nil)       => q"$mods def $name: $returnType = $returnValue"
+      case Some(List(Nil)) => q"$mods def $name(): $returnType = $returnValue"
+      case Some(argLists)  => q"$mods def $name(...$argLists): $returnType = $returnValue"
     }
   }
 

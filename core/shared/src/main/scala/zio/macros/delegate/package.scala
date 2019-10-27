@@ -45,25 +45,25 @@ package object delegate {
 
   implicit class ZIOSyntax[R, E, A](zio: ZIO[R, E, A]) {
 
-    def >>+[B](enrichWith: EnrichWith[B])(implicit ev: A Mix B): ZIO[R, E, A with B] =
+    def @@[B](enrichWith: EnrichWith[B])(implicit ev: A Mix B): ZIO[R, E, A with B] =
       enrichWith.enrichZIO[R, E, A](zio)
 
-    def >>+[B](enrichWithM: EnrichWithM[A, E, B])(implicit ev: A Mix B): ZIO[R, E, A with B] =
+    def @@[B](enrichWithM: EnrichWithM[A, E, B])(implicit ev: A Mix B): ZIO[R, E, A with B] =
       enrichWithM.enrichZIO[R, E, A](zio)
 
-    def >>+[B](enrichWithManaged: EnrichWithManaged[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
+    def @@[B](enrichWithManaged: EnrichWithManaged[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
       enrichWithManaged.enrichZManaged[R, E, A](zio.toManaged_)
   }
 
   implicit class ZManagedSyntax[R, E, A](zManaged: ZManaged[R, E, A]) {
 
-    def >>+[B](enrichWith: EnrichWith[B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
+    def @@[B](enrichWith: EnrichWith[B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
       enrichWith.enrichZManaged[R, E, A](zManaged)
 
-    def >>+[B](enrichWithM: EnrichWithM[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
+    def @@[B](enrichWithM: EnrichWithM[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
       enrichWithM.enrichZManaged[R, E, A](zManaged)
 
-    def >>+[B](enrichWithManaged: EnrichWithManaged[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
+    def @@[B](enrichWithManaged: EnrichWithManaged[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
       enrichWithManaged.enrichZManaged[R, E, A](zManaged)
   }
 }

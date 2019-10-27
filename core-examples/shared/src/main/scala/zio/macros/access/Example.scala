@@ -40,6 +40,7 @@ object Example {
     def overloaded(value: Long): ZIO[R, Nothing, String]
     val rio: RIO[R, String]
     val urio: URIO[R, String]
+    def nonAbstract(id: Int): ZIO[R, Nothing, String] = get(id)
   }
 
   val postValue: Int = 42
@@ -58,6 +59,7 @@ object ValidateAccessible {
   def overloaded(value: Long): URIO[Example, String]            = Example.>.overloaded(value)
   val rio: RIO[Example, String]                                 = Example.>.rio
   val urio: URIO[Example, String]                               = Example.>.urio
+  def nonAbstract(id: Int): URIO[Example, String]               = Example.>.nonAbstract(id)
 
   val preValue: Int  = Example.preValue
   val postValue: Int = Example.postValue

@@ -41,6 +41,7 @@ object Example {
     def overloaded(value: Long): ZIO[R, Nothing, String]
     val rio: RIO[R, String]
     val urio: URIO[R, String]
+    def nonAbstract(id: Int): ZIO[R, Nothing, String] = get(id)
   }
 
   val postValue: Int = 42
@@ -59,6 +60,7 @@ object ValidateMockable {
   val overloaded1: Method[Long, String]         = Example.overloaded._1
   val rio: Method[Unit, String]                 = Example.rio
   val urio: Method[Unit, String]                = Example.urio
+  val nonAbstract: Method[Int, String]          = Example.nonAbstract
 
   val preValue: Int  = Example.preValue
   val postValue: Int = Example.postValue

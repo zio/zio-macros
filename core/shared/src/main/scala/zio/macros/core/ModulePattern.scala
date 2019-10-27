@@ -65,10 +65,12 @@ private[macros] trait ModulePattern extends ZIOExtractor {
 
   protected case class Capability(
     name: TermName,
+    mods: Modifiers,
     argLists: Option[List[List[ValDef]]],
     env: Tree,
     error: Tree,
-    value: Tree
+    value: Tree,
+    impl: Tree
   )
 
   protected def extractTrees(annottees: Seq[c.Tree]): TreesSummary =
@@ -135,11 +137,11 @@ private[macros] trait ModulePattern extends ZIOExtractor {
 
   protected def extractCapabilities(service: ServiceSummary): List[Capability] =
     service.body.collect {
-      case DefDef(_, termName, _, argLists, ZIO(r, e, a), _) =>
-        Capability(termName, Some(argLists), r, e, a)
+      case DefDef(mods, termName, _, argLists, ZIO(r, e, a), impl) =>
+        Capability(termName, mods, Some(argLists), r, e, a, impl)
 
-      case ValDef(_, termName, ZIO(r, e, a), _) =>
-        Capability(termName, None, r, e, a)
+      case ValDef(mods, termName, ZIO(r, e, a), impl) =>
+        Capability(termName, mods, None, r, e, a, impl)
     }
 
   @silent("match may not be exhaustive")
