@@ -16,6 +16,7 @@
 package zio.macros.core
 
 import scala.reflect.macros.whitebox.Context
+import scala.util.Try
 
 private[macros] trait ZIOExtractor {
 
@@ -26,15 +27,41 @@ private[macros] trait ZIOExtractor {
   object ZIO {
 
     def unapply(tree: AppliedTypeTree): Option[(Tree, Tree, Tree)] =
-      tree.tpt match {
-        case Ident(term) =>
-          (term.toString, tree.args) match {
-            case ("ZIO", r :: e :: a :: Nil) => Some((r, e, a))
-            case ("RIO", r :: a :: Nil)      => Some((r, tq"Throwable", a))
-            case ("URIO", r :: a :: Nil)     => Some((r, tq"Nothing", a))
-            case _                           => None
-          }
-        case _ => None
-      }
+      for {
+        tree    <- if (tree.args.length <= dummies.length) Some(tree) else None
+        replace = dummies.zip(tree.args).toMap
+        typeArgs <- scala.util.Try {
+                     appliedType(c.typecheck(tree.tpt, c.TYPEmode).tpe.dealias.typeConstructor, replace.keys.toList).dealias.typeArgs.map {
+                       t =>
+                         replace.get(t).getOrElse(tq"$t")
+                     }
+                   }.toOption
+        result <- typeArgs match {
+                   case r :: e :: a :: Nil => Some((r, e, a))
+                   case _                  => None
+                 }
+      } yield result
+
+    private[this] case object Dummy1
+    private[this] case object Dummy2
+    private[this] case object Dummy3
+    private[this] case object Dummy4
+    private[this] case object Dummy5
+    private[this] case object Dummy6
+    private[this] case object Dummy7
+    private[this] case object Dummy8
+    private[this] case object Dummy9
+
+    private[this] val dummies = List(
+      weakTypeOf[Dummy1.type],
+      weakTypeOf[Dummy2.type],
+      weakTypeOf[Dummy3.type],
+      weakTypeOf[Dummy4.type],
+      weakTypeOf[Dummy5.type],
+      weakTypeOf[Dummy6.type],
+      weakTypeOf[Dummy7.type],
+      weakTypeOf[Dummy8.type],
+      weakTypeOf[Dummy9.type]
+    )
   }
 }
