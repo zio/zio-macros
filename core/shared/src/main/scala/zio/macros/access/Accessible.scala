@@ -15,6 +15,7 @@
  */
 package zio.macros.access
 
+import com.github.ghik.silencer.silent
 import zio.macros.core.ModulePattern
 
 import scala.annotation.{ StaticAnnotation, compileTimeOnly }
@@ -22,35 +23,55 @@ import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
 @compileTimeOnly("enable macro paradise to expand macro annotations")
-class accessible() extends StaticAnnotation {
+@silent("parameter value style in class accessible is never used")
+class accessible(style: String = "default") extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro AccessibleMacro.apply
 }
 
 private[access] class AccessibleMacro(val c: Context) extends ModulePattern {
   import c.universe._
 
+  sealed trait Style
+  object Style {
+    case object Default   extends Style
+    case object TraitOnly extends Style
+    case object AliasOnly extends Style
+  }
+
   def apply(annottees: c.Tree*): c.Tree = {
-    val trees       = extractTrees(annottees)
-    val module      = extractModule(trees.module)
-    val companion   = extractCompanion(trees.companion)
-    val service     = extractService(companion.body)
-    val capabilites = extractCapabilities(service)
-    val accessors   = generateCapabilityAccessors(trees.module, module.serviceName, capabilites)
-    val updated     = generateUpdatedCompanion(module, companion, accessors)
+
+    @silent("""pattern var [^\s]+ in method unapply is never used""")
+    val style: Style = c.prefix.tree match {
+      case Apply(_, Literal(Constant(style)) :: Nil) =>
+        style match {
+          case "default"     => Style.Default
+          case "trait"       => Style.TraitOnly
+          case ">" | "alias" => Style.AliasOnly
+          case _ => abort(s"Invalid style: $style")
+        }
+      case other => abort(s"Invalid macro call ${showRaw(other)}")
+    }
+
+    val trees            = extractTrees(annottees)
+    val module           = extractModule(trees.module)
+    val companion        = extractCompanion(trees.companion)
+    val service          = extractService(companion.body)
+    val capabilites      = extractCapabilities(service)
+    val accessors        = generateCapabilityAccessors(module.name, module.serviceName, capabilites)
+    val updatedCompanion = generateUpdatedCompanion(style, module, companion, accessors)
 
     q"""
        ${trees.module}
-       $updated
+       $updatedCompanion
      """
   }
 
   private def generateCapabilityAccessors(
-    module: ClassDef,
+    moduleType: TypeName,
     serviceName: TermName,
     capabilities: List[Capability]
   ): List[Tree] =
     capabilities.map { capability =>
-      val moduleType   = module.name
       val (name, e, a) = (capability.name, capability.error, capability.value)
       val mods =
         if (capability.impl == EmptyTree) Modifiers()
@@ -75,18 +96,29 @@ private[access] class AccessibleMacro(val c: Context) extends ModulePattern {
     }
 
   private def generateUpdatedCompanion(
+    style: Style,
     module: ModuleSummary,
     companion: CompanionSummary,
     capabilityAccessors: List[Tree]
-  ): Tree =
+  ): Tree = {
+
+    val accessor: Tree = style match {
+      case Style.TraitOnly => EmptyTree
+      case Style.Default   => q"object accessors extends Accessors"
+      case Style.AliasOnly => q"object > extends Accessors"
+    }
+
     q"""
       object ${companion.name} {
 
         ..${companion.body}
 
-       object > extends Service[${module.name}] {
+       trait Accessors extends Service[${module.name}] {
          ..$capabilityAccessors
        }
-      }
+
+       $accessor
+     }
     """
+  }
 }
