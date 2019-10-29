@@ -37,7 +37,8 @@ private[mock] class MockableMacro(val c: Context) extends ModulePattern {
     val capabilites = extractCapabilities(service)
     val tags        = generateCapabilityTags(module, capabilites)
     val mocks       = generateCapabilityMocks(companion, capabilites)
-    val updated     = generateUpdatedCompanion(module.name, module.name.toTermName, module.serviceName, service, tags, mocks)
+    val updated =
+      generateUpdatedCompanion(module.name, module.name.toTermName, module.serviceName, service, tags, mocks)
 
     q"""
        ${trees.module}

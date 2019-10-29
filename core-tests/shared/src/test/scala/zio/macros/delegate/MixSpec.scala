@@ -15,92 +15,101 @@
  */
 package zio.macros.delegate
 
-class MixSpec extends UnitSpec {
-  describe("Mix") {
-    it("should allow mixing of traits") {
-      trait Foo {
-        def a: Int = 1
-      }
-      trait Bar {
-        def b: Int = 2
-      }
-      val mixed = Mix[Foo, Bar].mix(new Foo {}, new Bar {})
-      assert(mixed.a == 1 && mixed.b == 2)
-    }
-    it("should overwrite methods defined on both instances with the second") {
-      trait Foo {
-        def a: Int = 1
-      }
-      trait Bar extends Foo {
-        override def a = 2
-      }
-      val mixed = Mix[Foo, Bar].mix(new Foo {}, new Bar {})
-      assert(mixed.a == 2)
-    }
-    it("should allow the first type to be a class") {
-      class Foo {
-        def a: Int = 1
-      }
-      trait Bar {
-        def b: Int = 2
-      }
-      val mixed = Mix[Foo, Bar].mix(new Foo(), new Bar {})
-      assert(mixed.a == 1 && mixed.b == 2)
-    }
-    it("should support methods with same name") {
-      trait Foo {
-        def a(a: Int): Int
-      }
-      trait Bar {
-        def a(a: String): String
-      }
-      val mixed = Mix[Foo, Bar].mix(new Foo { def a(a: Int) = 1 }, new Bar { def a(a: String) = "foo" })
-      assert(mixed.a(1) == 1 && mixed.a("") == "foo")
-    }
-    it("should support type aliases - 1") {
-      trait Foo {
-        def a(a: Int): Int
-      }
-      trait Bar {
-        def a(a: String): String
-      }
-      trait Baz
-      type FooBar = Foo with Bar
-      val mixed = Mix[FooBar, Baz].mix(new Foo with Bar { def a(a: Int) = 2; def a(a: String) = "foo" }, new Baz {})
-      assert(mixed.a(1) == 2 && mixed.a("") == "foo")
-    }
-    it("should support type aliases - 2") {
-      trait Foo {
-        def a(a: Int): Int
-      }
-      trait Bar {
-        def a(a: String): String
-      }
-      trait Baz
-      type FooBar = Foo with Bar
-      val mixed = Mix[Baz, FooBar].mix(new Baz {}, new Foo with Bar { def a(a: Int) = 2; def a(a: String) = "foo" })
-      assert(mixed.a(1) == 2 && mixed.a("") == "foo")
-    }
-    it("should support type arguments") {
-      trait Foo[A] {
-        def a(a: Int): A
-      }
-      trait Bar {
-        def b(a: String): String
-      }
-      trait Baz
-      type FooBar = Foo[Int] with Bar
-      val mixed =
-        Mix[Baz, FooBar].mix(new Baz {}, new Foo[Int] with Bar { def a(a: Int) = 2; def b(a: String) = "foo" })
-      assert(mixed.a(1) == 2 && mixed.b("") == "foo")
-    }
-    it("should allow overriding members") {
-      trait Foo {
-        def a: Int = 1
-      }
-      trait Bar
-      val mixed = Mix[Foo with Bar, Foo].mix(new Foo with Bar {}, new Foo { override def a = 2 })
-      assert(mixed.a == 2)
-    }
-  }
-}
+import zio.test.{ DefaultRunnableSpec, assert, suite, test }
+import zio.test.Assertion.equalTo
+
+object MixSpec
+    extends DefaultRunnableSpec(
+      suite("Mix")(
+        test("should allow mixing of traits") {
+          trait Foo {
+            def a: Int = 1
+          }
+          trait Bar {
+            def b: Int = 2
+          }
+          val mixed = Mix[Foo, Bar].mix(new Foo {}, new Bar {})
+          assert(mixed.a, equalTo(1)) && assert(mixed.b, equalTo(2))
+        },
+        test("should overwrite methods defined on both instances with the second") {
+          trait Foo {
+            def a: Int = 1
+          }
+          trait Bar extends Foo {
+            override def a = 2
+          }
+          val mixed = Mix[Foo, Bar].mix(new Foo {}, new Bar {})
+          assert(mixed.a, equalTo(2))
+        },
+        test("should allow the first type to be a class") {
+          class Foo {
+            def a: Int = 1
+          }
+          trait Bar {
+            def b: Int = 2
+          }
+          val mixed = Mix[Foo, Bar].mix(new Foo(), new Bar {})
+          assert(mixed.a, equalTo(1)) && assert(mixed.b, equalTo(2))
+        },
+        test("should support methods with same name") {
+          trait Foo {
+            def a(a: Int): Int
+          }
+          trait Bar {
+            def a(a: String): String
+          }
+          val mixed = Mix[Foo, Bar].mix(new Foo { def a(a: Int) = 1 }, new Bar { def a(a: String) = "foo" })
+          assert(mixed.a(1), equalTo(1)) && assert(mixed.a(""), equalTo("foo"))
+        },
+        suite("should support type aliases")(
+          test("case 1") {
+            trait Foo {
+              def a(a: Int): Int
+            }
+            trait Bar {
+              def a(a: String): String
+            }
+            trait Baz
+            type FooBar = Foo with Bar
+            val mixed =
+              Mix[FooBar, Baz].mix(new Foo with Bar { def a(a: Int) = 2; def a(a: String) = "foo" }, new Baz {})
+            assert(mixed.a(1), equalTo(2)) && assert(mixed.a(""), equalTo("foo"))
+          },
+          test("case 2") {
+            trait Foo {
+              def a(a: Int): Int
+            }
+            trait Bar {
+              def a(a: String): String
+            }
+            trait Baz
+            type FooBar = Foo with Bar
+            val mixed = Mix[Baz, FooBar].mix(new Baz {}, new Foo with Bar {
+              def a(a: Int) = 2; def a(a: String) = "foo"
+            })
+            assert(mixed.a(1), equalTo(2)) && assert(mixed.a(""), equalTo("foo"))
+          }
+        ),
+        test("should support type arguments") {
+          trait Foo[A] {
+            def a(a: Int): A
+          }
+          trait Bar {
+            def b(a: String): String
+          }
+          trait Baz
+          type FooBar = Foo[Int] with Bar
+          val mixed =
+            Mix[Baz, FooBar].mix(new Baz {}, new Foo[Int] with Bar { def a(a: Int) = 2; def b(a: String) = "foo" })
+          assert(mixed.a(1), equalTo(2)) && assert(mixed.b(""), equalTo("foo"))
+        },
+        test("should allow overriding members") {
+          trait Foo {
+            def a: Int = 1
+          }
+          trait Bar
+          val mixed = Mix[Foo with Bar, Foo].mix(new Foo with Bar {}, new Foo { override def a = 2 })
+          assert(mixed.a, equalTo(2))
+        }
+      )
+    )

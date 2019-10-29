@@ -32,22 +32,29 @@ private[access] class AccessibleMacro(val c: Context) extends ModulePattern {
   import c.universe._
 
   sealed trait Style
+
   object Style {
     case object Default   extends Style
-    case object TraitOnly extends Style
     case object AliasOnly extends Style
+    case object TraitOnly extends Style
   }
 
   def apply(annottees: c.Tree*): c.Tree = {
 
-    @silent("""pattern var [^\s]+ in method unapply is never used""")
+    @silent("pattern var [^\\s]+ in method unapply is never used")
     val style: Style = c.prefix.tree match {
-      case Apply(_, Literal(Constant(style)) :: Nil) =>
-        style match {
-          case "default"     => Style.Default
-          case "trait"       => Style.TraitOnly
-          case ">" | "alias" => Style.AliasOnly
-          case _ => abort(s"Invalid style: $style")
+      case Apply(_, args) =>
+        val arg: String = args.collectFirst {
+          case q"$cfg" =>
+            c.eval(c.Expr[String](cfg))
+        }.getOrElse("default")
+
+        arg match {
+          case ">"       => Style.AliasOnly
+          case "alias"   => Style.AliasOnly
+          case "trait"   => Style.TraitOnly
+          case "default" => Style.Default
+          case _         => abort(s"Invalid style: $arg")
         }
       case other => abort(s"Invalid macro call ${showRaw(other)}")
     }
@@ -103,9 +110,9 @@ private[access] class AccessibleMacro(val c: Context) extends ModulePattern {
   ): Tree = {
 
     val accessor: Tree = style match {
-      case Style.TraitOnly => EmptyTree
       case Style.Default   => q"object accessors extends Accessors"
       case Style.AliasOnly => q"object > extends Accessors"
+      case Style.TraitOnly => EmptyTree
     }
 
     q"""
