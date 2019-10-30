@@ -35,7 +35,7 @@ private[mock] class MockableMacro(val c: Context) extends ModulePattern {
     val companion   = extractCompanion(trees.companion)
     val service     = extractService(companion.body)
     val capabilites = extractCapabilities(service)
-    val tags        = generateCapabilityTags(capabilites)
+    val tags        = generateCapabilityTags(module, capabilites)
     val mocks       = generateCapabilityMocks(companion, capabilites)
     val updated     = generateUpdatedCompanion(module, companion, service, tags, mocks)
 
@@ -45,24 +45,32 @@ private[mock] class MockableMacro(val c: Context) extends ModulePattern {
      """
   }
 
-  private def generateCapabilityTags(capabilities: List[Capability]): List[Tree] =
+  private def generateCapabilityTags(
+    module: ModuleSummary,
+    capabilities: List[Capability]
+  ): List[Tree] =
     capabilities
       .groupBy(_.name)
       .collect {
         case (name, capability :: Nil) =>
-          generateCapabilityTag(name, capability)
+          generateCapabilityTag(module, name, capability)
         case (name, overloads) =>
           val body: List[Tree] = overloads.zipWithIndex.map {
             case (capability, idx) =>
               val idxName = TermName(s"_$idx")
-              generateCapabilityTag(idxName, capability)
+              generateCapabilityTag(module, idxName, capability)
           }
 
           q"object $name { ..$body }"
       }
       .toList
 
-  private def generateCapabilityTag(name: TermName, capability: Capability): Tree = {
+  private def generateCapabilityTag(
+    module: ModuleSummary,
+    name: TermName,
+    capability: Capability
+  ): Tree = {
+    val moduleType = module.name
     val inputType = capability.argLists.map(_.flatten).getOrElse(Nil) match {
       case Nil        => tq"Unit"
       case arg :: Nil => arg.tpt
@@ -72,7 +80,7 @@ private[mock] class MockableMacro(val c: Context) extends ModulePattern {
         tq"(..$typeParams)"
     }
     val outputType = capability.value
-    q"case object $name extends _root_.zio.test.mock.Method[$inputType, $outputType]"
+    q"case object $name extends _root_.zio.test.mock.Method[$moduleType, $inputType, $outputType]"
   }
 
   private def generateCapabilityMocks(

@@ -49,18 +49,18 @@ object Example {
 
 object ValidateMockable {
   // if macro expands correctly code below should compile
-  val get: Method[Int, String]                  = Example.get
-  val set: Method[(Int, String), Unit]          = Example.set
-  val getAndSet: Method[(Int, String), String]  = Example.getAndSet
-  val getAndSet2: Method[(Int, String), String] = Example.getAndSet2
-  val clear: Method[Unit, Unit]                 = Example.clear
-  val clear2: Method[Unit, Unit]                = Example.clear2
-  val clear3: Method[Unit, Unit]                = Example.clear3
-  val overloaded0: Method[Int, String]          = Example.overloaded._0
-  val overloaded1: Method[Long, String]         = Example.overloaded._1
-  val rio: Method[Unit, String]                 = Example.rio
-  val urio: Method[Unit, String]                = Example.urio
-  val nonAbstract: Method[Int, String]          = Example.nonAbstract
+  val get: Method[Example, Int, String]                  = Example.get
+  val set: Method[Example, (Int, String), Unit]          = Example.set
+  val getAndSet: Method[Example, (Int, String), String]  = Example.getAndSet
+  val getAndSet2: Method[Example, (Int, String), String] = Example.getAndSet2
+  val clear: Method[Example, Unit, Unit]                 = Example.clear
+  val clear2: Method[Example, Unit, Unit]                = Example.clear2
+  val clear3: Method[Example, Unit, Unit]                = Example.clear3
+  val overloaded0: Method[Example, Int, String]          = Example.overloaded._0
+  val overloaded1: Method[Example, Long, String]         = Example.overloaded._1
+  val rio: Method[Example, Unit, String]                 = Example.rio
+  val urio: Method[Example, Unit, String]                = Example.urio
+  val nonAbstract: Method[Example, Int, String]          = Example.nonAbstract
 
   val preValue: Int  = Example.preValue
   val postValue: Int = Example.postValue
