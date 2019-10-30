@@ -23,40 +23,30 @@ import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
 @compileTimeOnly("enable macro paradise to expand macro annotations")
-@silent("parameter value style in class accessible is never used")
-class accessible(style: String = "default") extends StaticAnnotation {
+@silent("parameter value name in class accessible is never used")
+class accessible(name: String = null) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro AccessibleMacro.apply
 }
-
 private[access] class AccessibleMacro(val c: Context) extends ModulePattern {
   import c.universe._
 
-  sealed trait Style
-
-  object Style {
-    case object Default   extends Style
-    case object AliasOnly extends Style
-    case object TraitOnly extends Style
-  }
+  case class Config(name: Option[String])
 
   def apply(annottees: c.Tree*): c.Tree = {
 
     @silent("pattern var [^\\s]+ in method unapply is never used")
-    val style: Style = c.prefix.tree match {
+    val config: Config = c.prefix.tree match {
       case Apply(_, args) =>
-        val arg: String = args.collectFirst {
-          case q"$cfg" =>
-            c.eval(c.Expr[String](cfg))
-        }.getOrElse("default")
-
-        arg match {
-          case ">"       => Style.AliasOnly
-          case "alias"   => Style.AliasOnly
-          case "trait"   => Style.TraitOnly
-          case "default" => Style.Default
-          case _         => abort(s"Invalid style: $arg")
+        val name = args.collectFirst { case q"$cfg" => c.eval(c.Expr[String](cfg)) }.map { ident =>
+          util.Try(c.typecheck(c.parse(s"object $ident {}"))) match {
+            case util.Failure(_) =>
+              c.abort(c.enclosingPosition, s"""Invalid identifier "$ident". Cannot generate accessors object.""")
+            case util.Success(_) => ident
+          }
         }
-      case other => abort(s"Invalid macro call ${showRaw(other)}")
+
+        Config(name)
+      case other => c.abort(c.enclosingPosition, s"Invalid accessible macro call ${showRaw(other)}")
     }
 
     val trees            = extractTrees(annottees)
@@ -65,7 +55,7 @@ private[access] class AccessibleMacro(val c: Context) extends ModulePattern {
     val service          = extractService(companion.body)
     val capabilites      = extractCapabilities(service)
     val accessors        = generateCapabilityAccessors(module.name, module.serviceName, capabilites)
-    val updatedCompanion = generateUpdatedCompanion(style, module, companion, accessors)
+    val updatedCompanion = generateUpdatedCompanion(config, module, companion, accessors)
 
     q"""
        ${trees.module}
@@ -103,16 +93,15 @@ private[access] class AccessibleMacro(val c: Context) extends ModulePattern {
     }
 
   private def generateUpdatedCompanion(
-    style: Style,
+    config: Config,
     module: ModuleSummary,
     companion: CompanionSummary,
     capabilityAccessors: List[Tree]
   ): Tree = {
 
-    val accessor: Tree = style match {
-      case Style.Default   => q"object accessors extends Accessors"
-      case Style.AliasOnly => q"object > extends Accessors"
-      case Style.TraitOnly => EmptyTree
+    val accessor: Tree = config.name match {
+      case Some(name) => c.parse(s"object $name extends Accessors")
+      case None       => EmptyTree
     }
 
     q"""

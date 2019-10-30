@@ -22,18 +22,30 @@ import zio.test.Assertion.{ anything, equalTo }
 object AccessibleSpec
     extends DefaultRunnableSpec(
       suite("accessible annotation")(
-        suite("style")(
-          testM("trait") {
-            @accessible("trait")
-            trait Foo  { val foo: Foo.Service[Any] }
-            object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
+        suite("configuration")(
+          suite("default should generate only trait")(
+            testM("with parenthesis") {
+              @accessible()
+              trait Foo  { val foo: Foo.Service[Any] }
+              object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
 
-            for {
-              makeAccessors <- UIO(() => new Foo.Accessors {})
-              accessors     <- UIO(makeAccessors())
-            } yield assert(accessors, anything)
-          },
-          suite("alias")(
+              for {
+                makeAccessors <- UIO(() => new Foo.Accessors {})
+                accessors     <- UIO(makeAccessors())
+              } yield assert(accessors, anything)
+            },
+            testM("without parenthesis") {
+              @accessible
+              trait Foo  { val foo: Foo.Service[Any] }
+              object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
+
+              for {
+                makeAccessors <- UIO(() => new Foo.Accessors {})
+                accessors     <- UIO(makeAccessors())
+              } yield assert(accessors, anything)
+            }
+          ),
+          suite("named should generate accessors object")(
             test(">") {
               @accessible(">")
               trait Foo  { val foo: Foo.Service[Any] }
@@ -41,81 +53,65 @@ object AccessibleSpec
 
               assert(Foo.>, anything)
             },
-            test("alias") {
-              @accessible("alias")
+            test("proxy") {
+              @accessible("proxy")
               trait Foo  { val foo: Foo.Service[Any] }
               object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
 
-              assert(Foo.>, anything)
-            }
-          ),
-          suite("default")(
-            test("with parenthesis") {
-              @accessible()
-              trait Foo  { val foo: Foo.Service[Any] }
-              object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
-
-              assert(Foo.accessors, anything)
-            },
-            test("without parenthesis") {
-              @accessible
-              trait Foo  { val foo: Foo.Service[Any] }
-              object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
-
-              assert(Foo.accessors, anything)
+              assert(Foo.proxy, anything)
             }
           )
         ),
         suite("should generate accessors for")(
           test("val") {
-            @accessible()
+            @accessible(">")
             trait Foo  { val foo: Foo.Service[Any] }
             object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
 
-            assert(Foo.accessors.a, anything)
+            assert(Foo.>.a, anything)
           },
           suite("def")(
             suite("no args")(
               test("without parenthesis") {
-                @accessible()
+                @accessible(">")
                 trait Foo  { val foo: Foo.Service[Any] }
                 object Foo { trait Service[R] { def a: ZIO[R, Nothing, Unit] } }
 
-                assert(Foo.accessors.a, anything)
+                assert(Foo.>.a, anything)
               },
               test("with parenthesis") {
-                @accessible()
+                @accessible(">")
                 trait Foo  { val foo: Foo.Service[Any] }
                 object Foo { trait Service[R] { def a(): ZIO[R, Nothing, Unit] } }
 
-                assert(Foo.accessors.a(), anything)
+                assert(Foo.>.a(), anything)
               }
             ),
             test("single argument") {
-              @accessible()
+              @accessible(">")
               trait Foo  { val foo: Foo.Service[Any] }
               object Foo { trait Service[R] { def a(v1: Int): ZIO[R, Nothing, Unit] } }
 
-              assert(Foo.accessors.a(1), anything)
+              assert(Foo.>.a(1), anything)
             },
             suite("multiple arguments")(
               test("single parameter list") {
-                @accessible()
+                @accessible(">")
                 trait Foo  { val foo: Foo.Service[Any] }
                 object Foo { trait Service[R] { def a(v1: Int, v2: Int): ZIO[R, Nothing, Unit] } }
 
-                assert(Foo.accessors.a(1, 2), anything)
+                assert(Foo.>.a(1, 2), anything)
               },
               test("multiple parameter lists") {
-                @accessible()
+                @accessible(">")
                 trait Foo  { val foo: Foo.Service[Any] }
                 object Foo { trait Service[R] { def a(v1: Int)(v2: Int): ZIO[R, Nothing, Unit] } }
 
-                assert(Foo.accessors.a(1)(2), anything)
+                assert(Foo.>.a(1)(2), anything)
               }
             ),
             test("overloaded") {
-              @accessible()
+              @accessible(">")
               trait Foo { val foo: Foo.Service[Any] }
               object Foo {
                 trait Service[R] {
@@ -124,35 +120,35 @@ object AccessibleSpec
                 }
               }
 
-              assert(Foo.accessors.a(1), anything) && assert(Foo.accessors.a(1L), anything)
+              assert(Foo.>.a(1), anything) && assert(Foo.>.a(1L), anything)
             },
             suite("zio aliases")(
               test("RIO") {
-                @accessible()
+                @accessible(">")
                 trait Foo  { val foo: Foo.Service[Any] }
                 object Foo { trait Service[R] { val a: RIO[R, Unit] } }
 
-                assert(Foo.accessors.a, anything)
+                assert(Foo.>.a, anything)
               },
               test("URIO") {
-                @accessible()
+                @accessible(">")
                 trait Foo  { val foo: Foo.Service[Any] }
                 object Foo { trait Service[R] { val a: URIO[R, Unit] } }
 
-                assert(Foo.accessors.a, anything)
+                assert(Foo.>.a, anything)
               }
             ),
             test("non abstract methods") {
-              @accessible()
+              @accessible(">")
               trait Foo  { val foo: Foo.Service[Any] }
               object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] = ZIO.unit } }
 
-              assert(Foo.accessors.a, anything)
+              assert(Foo.>.a, anything)
             }
           )
         ),
         test("should keep user-defined code") {
-          @accessible()
+          @accessible
           trait Foo { val foo: Foo.Service[Any] }
           object Foo {
             val preValue: Int = 42
