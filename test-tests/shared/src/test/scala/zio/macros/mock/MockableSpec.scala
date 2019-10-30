@@ -15,120 +15,58 @@
  */
 package zio.macros.mock
 
-//import zio.{ RIO, URIO, ZIO }
-//import zio.test.{ DefaultRunnableSpec, assert, suite, test }
-//import zio.test.Assertion.{ anything, isSubtype }
-//import zio.test.mock.Method
-import zio.test.{ DefaultRunnableSpec, suite }
+import zio.test.{ DefaultRunnableSpec, assert, suite, test }
+import zio.test.Assertion.{ anything, equalTo, isSubtype }
+import zio.test.mock.Method
 
 object MockableSPec
     extends DefaultRunnableSpec(
       suite("mockable annotation")(
-        /*
-TODO: figure out whats going on and fix the test suite
-
-// [error] an unexpected type representation reached the compiler backend while compiling MockableSpec.scala: <notype>. If possible, please file a bug on https://github.com/scala/bug/issues.
-// [error] Error while emitting MockableSpec.scala
-// [error] <notype> (of class scala.reflect.internal.Types$NoType$)
-
         suite("should generate mock method for")(
           test("val") {
-            @mockable
-            trait Foo  { val foo: Foo.Service[Any] }
-            object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
-
-            {
-              assert(Foo.a, anything)
-            }
+            assert(Foo01.a, anything)
           },
           suite("def")(
             suite("no args")(
               test("without parenthesis") {
-                @mockable
-                trait Foo  { val foo: Foo.Service[Any] }
-                object Foo { trait Service[R] { def a: ZIO[R, Nothing, Unit] } }
-
-                assert(Foo.a, isSubtype[Method[Unit, Unit]](anything))
+                assert(Foo02.a, isSubtype[Method[Foo02, Unit, Unit]](anything))
               },
               test("with parenthesis") {
-                @mockable
-                trait Foo  { val foo: Foo.Service[Any] }
-                object Foo { trait Service[R] { def a(): ZIO[R, Nothing, Unit] } }
-
-                assert(Foo.a, isSubtype[Method[Unit, Unit]](anything))
+                assert(Foo03.a, isSubtype[Method[Foo03, Unit, Unit]](anything))
               }
             ),
             test("single argument") {
-              @mockable
-              trait Foo  { val foo: Foo.Service[Any] }
-              object Foo { trait Service[R] { def a(v1: Int): ZIO[R, Nothing, Unit] } }
-
-              assert(Foo.a, isSubtype[Method[Int, Unit]](anything))
+              assert(Foo04.a, isSubtype[Method[Foo04, Int, Unit]](anything))
             },
             suite("multiple arguments")(
               test("single parameter list") {
-                @mockable
-                trait Foo  { val foo: Foo.Service[Any] }
-                object Foo { trait Service[R] { def a(v1: Int, v2: Int): ZIO[R, Nothing, Unit] } }
-
-                assert(Foo.a, isSubtype[Method[(Int, Int), Unit]](anything))
+                assert(Foo05.a, isSubtype[Method[Foo05, (Int, Int), Unit]](anything))
               },
               test("multiple parameter lists") {
-                @mockable
-                trait Foo  { val foo: Foo.Service[Any] }
-                object Foo { trait Service[R] { def a(v1: Int)(v2: Int): ZIO[R, Nothing, Unit] } }
-
-                assert(Foo.a, isSubtype[Method[(Int, Int), Unit]](anything))
+                assert(Foo06.a, isSubtype[Method[Foo06, (Int, Int), Unit]](anything))
               }
             ),
             test("overloaded") {
-              @mockable
-              trait Foo { val foo: Foo.Service[Any] }
-              object Foo {
-                trait Service[R] {
-                  def a(v1: Int): ZIO[R, Nothing, Unit]
-                  def a(v1: Long): ZIO[R, Nothing, Unit]
-                }
-              }
-
-              assert(Foo.a._0, isSubtype[Method[Int, Unit]](anything)) && assert(Foo.a._1, isSubtype[Method[Long, Unit]](anything))
+              assert(Foo07.a._0, isSubtype[Method[Foo07, Int, Unit]](anything)) && assert(
+                Foo07.a._1,
+                isSubtype[Method[Foo07, Long, Unit]](anything)
+              )
             },
             suite("zio aliases")(
               test("RIO") {
-                @mockable
-                trait Foo  { val foo: Foo.Service[Any] }
-                object Foo { trait Service[R] { val a: RIO[R, Unit] } }
-
-                assert(Foo.a, isSubtype[Method[Unit, Unit]](anything))
+                assert(Foo08.a, isSubtype[Method[Foo08, Unit, Unit]](anything))
               },
               test("URIO") {
-                @mockable
-                trait Foo  { val foo: Foo.Service[Any] }
-                object Foo { trait Service[R] { val a: URIO[R, Unit] } }
-
-                assert(Foo.a, isSubtype[Method[Unit, Unit]](anything))
+                assert(Foo09.a, isSubtype[Method[Foo09, Unit, Unit]](anything))
               }
             ),
             test("non abstract methods") {
-              @mockable
-              trait Foo  { val foo: Foo.Service[Any] }
-              object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] = ZIO.unit } }
-
-              assert(Foo.a, isSubtype[Method[Unit, Unit]](anything))
+              assert(Foo10.a, isSubtype[Method[Foo10, Unit, Unit]](anything))
             }
           )
         ),
         test("should keep user-defined code") {
-          @mockable
-          trait Foo { val foo: Foo.Service[Any] }
-          object Foo {
-            val preValue: Int = 42
-            trait Service[R] { def a: ZIO[R, Nothing, Unit] }
-            val postValue: Int = 42
-          }
-
-          assert(Foo.preValue, equalTo(42)) && assert(Foo.postValue, equalTo(42))
+          assert(Foo11.preValue, equalTo(42)) && assert(Foo11.postValue, equalTo(42))
         }
-       */
       )
     )

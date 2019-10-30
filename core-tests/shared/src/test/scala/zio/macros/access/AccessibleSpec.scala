@@ -15,22 +15,23 @@
  */
 package zio.macros.access
 
-import zio.{ RIO, URIO, ZIO }
-import zio.test.{ DefaultRunnableSpec, assert, suite, test }
+import zio.{ RIO, UIO, URIO, ZIO }
+import zio.test.{ DefaultRunnableSpec, assert, suite, test, testM }
 import zio.test.Assertion.{ anything, equalTo }
 
 object AccessibleSpec
     extends DefaultRunnableSpec(
       suite("accessible annotation")(
         suite("style")(
-          test("trait") {
+          testM("trait") {
             @accessible("trait")
             trait Foo  { val foo: Foo.Service[Any] }
             object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
 
-            val delayedAssert = () => assert(new Foo.Accessors {}, anything)
-
-            delayedAssert()
+            for {
+              makeAccessors <- UIO(() => new Foo.Accessors {})
+              accessors     <- UIO(makeAccessors())
+            } yield assert(accessors, anything)
           },
           suite("alias")(
             test(">") {
