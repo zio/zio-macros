@@ -38,8 +38,8 @@ ThisBuild / publishTo := sonatypePublishToBundle.value
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
-addCommandAlias("testJVM", ";coreTestsJVM/test;testTestsJVM/test")
-addCommandAlias("testJS", ";coreTestsJS/test;testTestsJS/test")
+addCommandAlias("testJVM", ";coreExamplesJVM/compile;testExamplesJVM/compile;coreTestsJVM/test;testTestsJVM/test")
+addCommandAlias("testJS", ";coreExamplesJS/compile;testExamplesJS/compile;coreTestsJS/test;testTestsJS/test")
 addCommandAlias("testRelease", ";set every isSnapshot := false;+clean;+compile")
 
 lazy val root = project
