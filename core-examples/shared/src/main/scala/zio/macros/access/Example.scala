@@ -19,7 +19,6 @@ import zio.{ RIO, URIO, ZIO }
 
 @accessible
 trait Example {
-
   val example: Example.Service[Any]
 }
 

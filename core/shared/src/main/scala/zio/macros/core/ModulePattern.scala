@@ -18,11 +18,22 @@ package zio.macros.core
 import com.github.ghik.silencer.silent
 import scala.reflect.macros.whitebox.Context
 
-private[macros] trait ModulePattern extends ZIOExtractor {
+private[macros] trait ModulePattern {
 
   val c: Context
 
   import c.universe._
+
+  private[this] class ZIOExtractor(typeParams: List[TypeDef]) {
+
+    def unapply(tree: AppliedTypeTree): Option[(Type, Type, Type)] = {
+      val typeName = TypeName(c.freshName())
+      c.typecheck(tq"({ type $typeName[..${typeParams}] = $tree })#$typeName", c.TYPEmode).tpe.dealias.typeArgs match {
+        case r :: e :: a :: Nil => Some((r, e, a))
+        case _                  => None
+      }
+    }
+  }
 
   protected case class TreesSummary(
     module: ClassDef,
@@ -67,9 +78,9 @@ private[macros] trait ModulePattern extends ZIOExtractor {
     name: TermName,
     mods: Modifiers,
     argLists: Option[List[List[ValDef]]],
-    env: Tree,
-    error: Tree,
-    value: Tree,
+    env: Type,
+    error: Type,
+    value: Type,
     impl: Tree
   )
 
@@ -135,14 +146,16 @@ private[macros] trait ModulePattern extends ZIOExtractor {
       case _ => abort("Could not find service trait")
     }
 
-  protected def extractCapabilities(service: ServiceSummary): List[Capability] =
+  protected def extractCapabilities(service: ServiceSummary): List[Capability] = {
+    val zio = new ZIOExtractor(service.typeParams)
     service.body.collect {
-      case DefDef(mods, termName, _, argLists, ZIO(r, e, a), impl) =>
+      case DefDef(mods, termName, _, argLists, zio(r, e, a), impl) =>
         Capability(termName, mods, Some(argLists), r, e, a, impl)
 
-      case ValDef(mods, termName, ZIO(r, e, a), impl) =>
+      case ValDef(mods, termName, zio(r, e, a), impl) =>
         Capability(termName, mods, None, r, e, a, impl)
     }
+  }
 
   @silent("match may not be exhaustive")
   protected def siblings(list: List[Tree], idx: Int): (List[Tree], Tree, List[Tree]) = {
