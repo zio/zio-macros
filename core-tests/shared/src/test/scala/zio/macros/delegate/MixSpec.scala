@@ -18,16 +18,12 @@ package zio.macros.delegate
 import zio.UIO
 import zio.test.{ DefaultRunnableSpec, assert, suite, testM }
 import zio.test.Assertion.equalTo
+import zio.test.TestAspect.ignore
 
 object MixSpec
     extends DefaultRunnableSpec(
       suite("Mix")(
         /*
-// TODO: investigate failure
-// java.lang.ClassCastException:
-//     zio.macros.delegate.MixSpec$$anonfun$$lessinit$greater$1$$anonfun$apply$11$$anonfun$apply$12$$anon$13
-// cannot be cast to
-//     zio.macros.delegate.MixSpec$$anonfun$$lessinit$greater$1$Bar$2
         testM("should allow mixing of traits") {
           trait Foo {
             def a: Int = 1
@@ -41,10 +37,8 @@ object MixSpec
             right <- UIO(new Bar {})
             mixed <- UIO(Mix[Foo, Bar].mix(left, right))
           } yield assert(mixed.a, equalTo(1)) && assert(mixed.b, equalTo(2))
-        },
-// TODO: investigate failure
-// java.lang.AbstractMethodError:
-//     zio.macros.delegate.MixSpec$$anonfun$$lessinit$greater$1$$anonfun$apply$10$$anonfun$apply$11$$anon$8.a()I
+        }, // TODO: does not compile on 2.11 only, see issue https://github.com/zio/zio-macros/issues/50
+         */
         testM("should overwrite methods defined on both instances with the second") {
           trait Foo {
             def a: Int = 1
@@ -58,8 +52,7 @@ object MixSpec
             right <- UIO(new Bar {})
             mixed <- UIO(Mix[Foo, Bar].mix(left, right))
           } yield assert(mixed.a, equalTo(2))
-        },
-         */
+        } @@ ignore, // TODO: fails on 2.11 only, see issue https://github.com/zio/zio-macros/issues/49
         testM("should allow the first type to be a class") {
           class Foo {
             def a: Int = 1

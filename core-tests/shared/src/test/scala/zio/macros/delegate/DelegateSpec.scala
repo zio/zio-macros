@@ -98,9 +98,8 @@ object DelegateSpec
                     }
           } yield assert(outer.a, equalTo(3))
         },
+        /*
         suite("should handle methods with same name but different signatures")(
-          /*
-// TODO: fix those tests for 2.11
           testM("case 1") {
             trait Foo {
               def a(i: Int): Int = 3
@@ -109,13 +108,13 @@ object DelegateSpec
             for {
               inner <- UIO(new Foo {})
               outer <- UIO {
-                class Bar(@delegate foo: Foo) {
-                  def a(s: String) = "bar"
-                }
-                new Bar(inner)
-              }
+                        class Bar(@delegate foo: Foo) {
+                          def a(s: String) = "bar"
+                        }
+                        new Bar(inner)
+                      }
             } yield assert(outer.a(""), equalTo("bar")) && assert(outer.a(0), equalTo(3))
-          },
+          }, // TODO: does not compile on 2.11 only, see issue https://github.com/zio/zio-macros/issues/47
           testM("case 2") {
             trait Foo {
               def a(i: Int): Int = 3
@@ -127,13 +126,13 @@ object DelegateSpec
             for {
               inner <- UIO(new Foo1 {})
               outer <- UIO {
-                class Bar(@delegate foo: Foo1)
-                new Bar(inner)
-              }
+                        class Bar(@delegate foo: Foo1)
+                        new Bar(inner)
+                      }
             } yield assert(outer.a(""), equalTo("bar")) && assert(outer.a(0), equalTo(3))
-          }
-         */
+          } // TODO: does not compile on 2.11 only, see issue https://github.com/zio/zio-macros/issues/48
         ),
+         */
         testM("should handle type parameters") {
           trait Foo[A] {
             def a: A

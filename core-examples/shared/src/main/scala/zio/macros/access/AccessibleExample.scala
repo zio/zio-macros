@@ -46,7 +46,7 @@ package object module extends Module.Accessors
 
 object AccessibleExample {
 
-  val program: ZIO[Module, Nothing, Unit] =
+  val program =
     for {
       _ <- module.get(1)
       _ <- module.set(1, "foo")
