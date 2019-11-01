@@ -38,8 +38,8 @@ ThisBuild / publishTo := sonatypePublishToBundle.value
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
-addCommandAlias("testJVM", ";coreExamplesJVM/test;testExamplesJVM/test")
-addCommandAlias("testJS", ";coreExamplesJS/test;testExamplesJS/test")
+addCommandAlias("testJVM", ";coreExamplesJVM/compile;testExamplesJVM/compile;coreTestsJVM/test;testTestsJVM/test")
+addCommandAlias("testJS", ";coreExamplesJS/compile;testExamplesJS/compile;coreTestsJS/test;testTestsJS/test")
 addCommandAlias("testRelease", ";set every isSnapshot := false;+clean;+compile")
 
 lazy val root = project
@@ -58,45 +58,45 @@ lazy val root = project
     test.jvm,
     test.js,
     testExamples.jvm,
-    testExamples.js
+    testExamples.js,
+    testTests.jvm,
+    testTests.js
   )
   .enablePlugins(ScalaJSPlugin)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .in(file("core"))
   .settings(stdSettings("zio-macros-core"))
-  .settings(macroSettings())
+  .settings(macroSettings)
   .settings(libraryDependencies += "dev.zio" %% "zio" % zioVersion)
 
 lazy val coreExamples = crossProject(JSPlatform, JVMPlatform)
   .in(file("core-examples"))
   .dependsOn(core)
   .settings(stdSettings("zio-macros-core-examples"))
-  .settings(examplesSettings())
+  .settings(examplesSettings)
 
 lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .in(file("core-tests"))
   .dependsOn(core)
   .settings(stdSettings("zio-macros-core-tests"))
-  .settings(
-    skip in publish := true,
-    scalacOptions ++= {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, x)) if x <= 11 => Seq("-Ywarn-unused:false")
-        case _                       => Seq("-Ywarn-unused:-explicits,_")
-      }
-    }
-  )
+  .settings(testSettings)
 
 lazy val test = crossProject(JSPlatform, JVMPlatform)
   .in(file("test"))
   .dependsOn(core)
   .settings(stdSettings("zio-macros-test"))
-  .settings(macroSettings())
+  .settings(macroSettings)
   .settings(libraryDependencies += "dev.zio" %% "zio-test" % zioVersion)
 
 lazy val testExamples = crossProject(JSPlatform, JVMPlatform)
   .in(file("test-examples"))
   .dependsOn(test)
   .settings(stdSettings("zio-macros-test-examples"))
-  .settings(examplesSettings())
+  .settings(examplesSettings)
+
+lazy val testTests = crossProject(JSPlatform, JVMPlatform)
+  .in(file("test-tests"))
+  .dependsOn(test)
+  .settings(stdSettings("zio-macros-test-tests"))
+  .settings(testSettings)

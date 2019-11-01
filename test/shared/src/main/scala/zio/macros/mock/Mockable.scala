@@ -37,7 +37,8 @@ private[mock] class MockableMacro(val c: Context) extends ModulePattern {
     val capabilites = extractCapabilities(service)
     val tags        = generateCapabilityTags(module, capabilites)
     val mocks       = generateCapabilityMocks(companion, capabilites)
-    val updated     = generateUpdatedCompanion(module, companion, service, tags, mocks)
+    val updated =
+      generateUpdatedCompanion(module.name, module.name.toTermName, module.serviceName, service, tags, mocks)
 
     q"""
        ${trees.module}
@@ -136,14 +137,15 @@ private[mock] class MockableMacro(val c: Context) extends ModulePattern {
   }
 
   private def generateUpdatedCompanion(
-    module: ModuleSummary,
-    companion: CompanionSummary,
+    moduleType: TypeName,
+    moduleName: TermName,
+    serviceName: TermName,
     service: ServiceSummary,
     capabilityTags: List[Tree],
     capabilityMocks: List[Tree]
   ): Tree =
     q"""
-       object ${companion.name} {
+       object $moduleName {
 
          ..${service.previousSiblings}
 
@@ -153,9 +155,9 @@ private[mock] class MockableMacro(val c: Context) extends ModulePattern {
 
          ..$capabilityTags
 
-         implicit val mockable: _root_.zio.test.mock.Mockable[${module.name}] = (mock: _root_.zio.test.mock.Mock) =>
-           new ${module.name} {
-             val ${module.serviceName} = new Service[Any] {
+         implicit val mockable: _root_.zio.test.mock.Mockable[$moduleType] = (mock: _root_.zio.test.mock.Mock) =>
+           new $moduleType {
+             val $serviceName = new Service[Any] {
                ..$capabilityMocks
              }
            }

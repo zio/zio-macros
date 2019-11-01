@@ -10,7 +10,8 @@ object BuildHelper {
   val zioVersion = "1.0.0-RC16"
 
   private val testDeps = Seq(
-    "org.scalatest" %% "scalatest" % "3.0.8" % "test"
+    "dev.zio" %% "zio-test"     % zioVersion % "test",
+    "dev.zio" %% "zio-test-sbt" % zioVersion % "test"
   )
 
   private def compileOnlyDeps(scalaVersion: String) = {
@@ -108,7 +109,8 @@ object BuildHelper {
       parallelExecution in Test := true,
       incOptions ~= (_.withLogRecompileOnMacro(true)),
       autoAPIMappings := true,
-      unusedCompileDependenciesFilter -= moduleFilter("org.scala-js", "scalajs-library")
+      unusedCompileDependenciesFilter -= moduleFilter("org.scala-js", "scalajs-library"),
+      testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
     )
 
   def macroSettings() =
@@ -124,5 +126,16 @@ object BuildHelper {
     Seq(
       skip in publish := true,
       libraryDependencies += "dev.zio" %% "zio" % zioVersion
+    )
+
+  def testSettings() =
+    Seq(
+      skip in publish := true,
+      scalacOptions ++= {
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, x)) if x <= 11 => Seq("-Ywarn-unused:false")
+          case _                       => Seq("-Ywarn-unused:-explicits,_")
+        }
+      }
     )
 }
