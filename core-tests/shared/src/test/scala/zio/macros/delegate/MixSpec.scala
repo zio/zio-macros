@@ -19,22 +19,27 @@ import zio.UIO
 import zio.test.{ DefaultRunnableSpec, assert, suite, testM }
 import zio.test.Assertion.equalTo
 
+import MixSuite._
+
 object MixSpec
     extends DefaultRunnableSpec(
       suite("Mix")(
-        MixSuite.mixingOfTraits,
-        MixSuite.overwriteMethods,
-        MixSuite.allowFirstClass,
-        MixSuite.methodsWithSameName,
-        MixSuite.typeAliases,
-        MixSuite.typeArguments,
-        MixSuite.overridingMembers
+        testM("should allow mixing of traits")(e1),
+        testM("should overwrite methods defined on both instances with the second")(e2),
+        testM("should allow the first type to be a class")(e3),
+        testM("should support methods with same name")(e4),
+        suite("should support type aliases")(
+          testM("case 1")(e5),
+          testM("case 2")(e6)
+        ),
+        testM("should support type arguments")(e7),
+        testM("should allow overriding members")(e8)
       )
     )
 
 object MixSuite {
 
-  val mixingOfTraits = testM("should allow mixing of traits") {
+  val e1 = {
     trait Foo {
       def a: Int = 1
     }
@@ -49,7 +54,7 @@ object MixSuite {
     } yield assert(mixed.a, equalTo(1)) && assert(mixed.b, equalTo(2))
   }
 
-  val overwriteMethods = testM("should overwrite methods defined on both instances with the second") {
+  val e2 = {
     trait Foo {
       def a: Int = 1
     }
@@ -64,7 +69,7 @@ object MixSuite {
     } yield assert(mixed.a, equalTo(2))
   }
 
-  val allowFirstClass = testM("should allow the first type to be a class") {
+  val e3 = {
     class Foo {
       def a: Int = 1
     }
@@ -79,7 +84,7 @@ object MixSuite {
     } yield assert(mixed.a, equalTo(1)) && assert(mixed.b, equalTo(2))
   }
 
-  val methodsWithSameName = testM("should support methods with same name") {
+  val e4 = {
     trait Foo {
       def a(a: Int): Int
     }
@@ -98,48 +103,47 @@ object MixSuite {
     } yield assert(mixed.a(1), equalTo(1)) && assert(mixed.a(""), equalTo("foo"))
   }
 
-  val typeAliases = suite("should support type aliases")(
-    testM("case 1") {
-      trait Foo {
-        def a(a: Int): Int
-      }
-      trait Bar {
-        def a(a: String): String
-      }
-      trait Baz
-      type FooBar = Foo with Bar
-
-      for {
-        left <- UIO(new Foo with Bar {
-                 def a(a: Int)    = 2
-                 def a(a: String) = "foo"
-               })
-        right <- UIO(new Baz {})
-        mixed <- UIO(Mix[FooBar, Baz].mix(left, right))
-      } yield assert(mixed.a(1), equalTo(2)) && assert(mixed.a(""), equalTo("foo"))
-    },
-    testM("case 2") {
-      trait Foo {
-        def a(a: Int): Int
-      }
-      trait Bar {
-        def a(a: String): String
-      }
-      trait Baz
-      type FooBar = Foo with Bar
-
-      for {
-        left <- UIO(new Baz {})
-        right <- UIO(new Foo with Bar {
-                  def a(a: Int)    = 2
-                  def a(a: String) = "foo"
-                })
-        mixed <- UIO(Mix[Baz, FooBar].mix(left, right))
-      } yield assert(mixed.a(1), equalTo(2)) && assert(mixed.a(""), equalTo("foo"))
+  val e5 = {
+    trait Foo {
+      def a(a: Int): Int
     }
-  )
+    trait Bar {
+      def a(a: String): String
+    }
+    trait Baz
+    type FooBar = Foo with Bar
 
-  val typeArguments = testM("should support type arguments") {
+    for {
+      left <- UIO(new Foo with Bar {
+               def a(a: Int)    = 2
+               def a(a: String) = "foo"
+             })
+      right <- UIO(new Baz {})
+      mixed <- UIO(Mix[FooBar, Baz].mix(left, right))
+    } yield assert(mixed.a(1), equalTo(2)) && assert(mixed.a(""), equalTo("foo"))
+  }
+
+  val e6 = {
+    trait Foo {
+      def a(a: Int): Int
+    }
+    trait Bar {
+      def a(a: String): String
+    }
+    trait Baz
+    type FooBar = Foo with Bar
+
+    for {
+      left <- UIO(new Baz {})
+      right <- UIO(new Foo with Bar {
+                def a(a: Int)    = 2
+                def a(a: String) = "foo"
+              })
+      mixed <- UIO(Mix[Baz, FooBar].mix(left, right))
+    } yield assert(mixed.a(1), equalTo(2)) && assert(mixed.a(""), equalTo("foo"))
+  }
+
+  val e7 = {
     trait Foo[A] {
       def a(a: Int): A
     }
@@ -159,7 +163,7 @@ object MixSuite {
     } yield assert(mixed.a(1), equalTo(2)) && assert(mixed.b(""), equalTo("foo"))
   }
 
-  val overridingMembers = testM("should allow overriding members") {
+  val e8 = {
     trait Foo {
       def a: Int = 1
     }

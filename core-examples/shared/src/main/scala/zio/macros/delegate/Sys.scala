@@ -15,6 +15,7 @@
  */
 package zio.macros.delegate
 
+import zio.macros.annotation.delegate
 import zio.blocking.Blocking
 import zio.clock.Clock
 
