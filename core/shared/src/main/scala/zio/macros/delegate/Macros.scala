@@ -19,7 +19,7 @@ import com.github.ghik.silencer.silent
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.macros.TypecheckException
 
-private[delegate] class Macros(val c: Context) {
+private[macros] class Macros(val c: Context) {
   import c.universe._
 
   case class MethodSummary(

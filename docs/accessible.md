@@ -9,7 +9,7 @@ The `@accessible` annotation can be used on _modules_ following the [module patt
 When applied to the _module_ it will autogenerate the `>` container in module's compation object with helpers to access service capabilities:
 
 ```scala
-import zio.macros.access.accessible
+import zio.macros.annotation.accessible
 
 @accessible
 trait Example {

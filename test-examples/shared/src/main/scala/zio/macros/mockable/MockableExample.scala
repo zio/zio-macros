@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package zio.macros.mock
+package zio.macros.mockable
 
 import zio.{ RIO, UManaged, URIO, ZIO }
+import zio.macros.annotation.mockable
 import zio.test.Assertion.equalTo
 import zio.test.mock.Expectation.{ unit, value }
 

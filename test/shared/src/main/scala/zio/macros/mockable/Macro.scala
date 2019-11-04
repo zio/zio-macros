@@ -13,20 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package zio.macros.mock
+package zio.macros.mockable
 
 import zio.macros.core.ModulePattern
 
-import scala.annotation.{ StaticAnnotation, compileTimeOnly }
-import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
-@compileTimeOnly("enable macro paradise to expand macro annotations")
-class mockable() extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro MockableMacro.apply
-}
-
-private[mock] class MockableMacro(val c: Context) extends ModulePattern {
+private[macros] class Macro(val c: Context) extends ModulePattern {
   import c.universe._
 
   def apply(annottees: c.Tree*): c.Tree = {

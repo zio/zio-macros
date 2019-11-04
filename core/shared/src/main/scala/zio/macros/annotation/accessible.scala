@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package zio.macros.delegate
+package zio.macros.annotation
 
 import com.github.ghik.silencer.silent
-import scala.annotation.StaticAnnotation
-import scala.annotation.compileTimeOnly
+import zio.macros.accessible.Macro
+
+import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 import scala.language.experimental.macros
 
-@compileTimeOnly("delegate annotation should have been removed.")
-@silent("parameter value (verbose|forwardObjectMethods|generateTraits) in class delegate is never used")
-class delegate(verbose: Boolean = false, forwardObjectMethods: Boolean = false, generateTraits: Boolean = true)
-    extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro Macros.delegateImpl
+@compileTimeOnly("enable macro paradise to expand macro annotations")
+@silent("parameter value name in class accessible is never used")
+class accessible(name: String = null) extends StaticAnnotation {
+  def macroTransform(annottees: Any*): Any = macro Macro.apply
 }

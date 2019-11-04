@@ -13,21 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package zio.macros.access
+package zio.macros.accessible
 
 import com.github.ghik.silencer.silent
 import zio.macros.core.ModulePattern
 
-import scala.annotation.{ StaticAnnotation, compileTimeOnly }
-import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
-@compileTimeOnly("enable macro paradise to expand macro annotations")
-@silent("parameter value name in class accessible is never used")
-class accessible(name: String = null) extends StaticAnnotation {
-  def macroTransform(annottees: Any*): Any = macro AccessibleMacro.apply
-}
-private[access] class AccessibleMacro(val c: Context) extends ModulePattern {
+private[macros] class Macro(val c: Context) extends ModulePattern {
   import c.universe._
 
   case class Config(name: Option[String])

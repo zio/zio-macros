@@ -16,6 +16,7 @@
 package zio.macros.access
 
 import zio.{ RIO, UIO, URIO, ZIO }
+import zio.macros.annotation.accessible
 import zio.test.{ DefaultRunnableSpec, assert, suite, test, testM }
 import zio.test.Assertion.{ anything, equalTo }
 
