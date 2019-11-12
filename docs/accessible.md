@@ -6,12 +6,12 @@ To use simply add `"dev.zio" %% "zio-macros-core" % "<version>"` to your `librar
 
 The `@accessible` annotation can be used on _modules_ following the [module pattern](https://zio.dev/docs/howto/howto_use_module_pattern).
 
-When applied to the _module_ it will autogenerate the `>` container in module's compation object with helpers to access service capabilities:
+When applied to the _module_ it will autogenerate the container with a given name in the module's companion object with helpers to access service capabilities:
 
 ```scala
 import zio.macros.annotation.accessible
 
-@accessible
+@accessible(">")
 trait Example {
   val example: Example.Service[Any]
 }
