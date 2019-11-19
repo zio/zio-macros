@@ -20,6 +20,7 @@ import zio._
 import zio.clock.Clock
 import zio.blocking.Blocking
 import zio.console.Console
+import zio.macros.delegate.syntax._
 
 object EnrichWithExample {
 
