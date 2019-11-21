@@ -27,23 +27,23 @@ package object delegate {
     f => old => ev.mix(old, f(old))
 
   /**
-   * Creates an object that can be used to partially provide from ZIO's environment.
+   * Creates an object that can be used to partially provide ZIO's environment.
    */
   def eliminate[A](a: A): Eliminate[A] =
     new Eliminate(enrichWith(a))
 
   /**
-   * Create an object that can be used to enrich an instance with a trait implementation.
+   * Create an object that can be used to extend an instance with a trait implementation.
    */
   def enrichWith[A](a: A): EnrichWith[A] = new EnrichWith(a)
 
   /**
-   * Create an object that can be used to enrich an instance with an effectfully created trait implementation.
+   * Create an object that can be used to extend an instance with an effectfully created trait implementation.
    */
   def enrichWithM[A]: EnrichWithM.PartiallyApplied[A] = new EnrichWithM.PartiallyApplied
 
   /**
-   * Create an object that can be used to enrich an instance with an trait implementation that requires resources.
+   * Create an object that can be used to extend an instance with a trait implementation that requires resources.
    */
   def enrichWithManaged[A]: EnrichWithManaged.PartiallyApplied[A] = new EnrichWithManaged.PartiallyApplied
 
