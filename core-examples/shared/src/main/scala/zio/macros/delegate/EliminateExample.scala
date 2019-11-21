@@ -32,7 +32,6 @@
 package zio.macros.delegate
 
 import zio._
-import zio.macros.delegate._
 import zio.clock.Clock
 import zio.blocking.Blocking
 

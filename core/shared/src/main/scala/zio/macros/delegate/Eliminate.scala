@@ -18,7 +18,7 @@ package zio.macros.delegate
 
 import zio._
 
-final class Eliminate[R](ext: Extend[R]) {
+final class Eliminate[R](ext: EnrichWith[R]) {
 
   def apply[R1, R2 >: R with R1, E, A](zio: ZIO[R2, E, A])(implicit ev: R1 Mix R): ZIO[R1, E, A] =
     zio.provideSome(r => ext[R1](r))

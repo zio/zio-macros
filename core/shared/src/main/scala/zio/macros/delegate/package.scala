@@ -27,30 +27,23 @@ package object delegate {
     f => old => ev.mix(old, f(old))
 
   /**
-   * Generates a function that can be used to add a trait implementation to an existing instance.
-   */
-  def extend[A](a: A): Extend[A] = new Extend(a)
-
-  /**
-   * Creates an Eliminate that can be used to remove requirements from ZIO's environment.
+   * Creates an object that can be used to partially provide from ZIO's environment.
    */
   def eliminate[A](a: A): Eliminate[A] =
-    new Eliminate(extend(a))
+    new Eliminate(enrichWith(a))
 
   /**
-   * Create a function that can be used to enrich ZIO or ZManaged with the mixed in trait instance.
+   * Create an object that can be used to enrich an instance with a trait implementation.
    */
   def enrichWith[A](a: A): EnrichWith[A] = new EnrichWith(a)
 
   /**
-   * Create a function that can be used to enrich ZIO or ZManaged with the mixed in effectfully created trait instance.
-   * The generating effect can use the output of the effect that will be mixed into.
+   * Create an object that can be used to enrich an instance with an effectfully created trait implementation.
    */
   def enrichWithM[A]: EnrichWithM.PartiallyApplied[A] = new EnrichWithM.PartiallyApplied
 
   /**
-   * Create a function that can be used to enrich ZIO or ZManaged with the mixed in effectfully created trait instance.
-   * The generating effect can use the output of the effect that will be mixed into.
+   * Create an object that can be used to enrich an instance with an trait implementation that requires resources.
    */
   def enrichWithManaged[A]: EnrichWithManaged.PartiallyApplied[A] = new EnrichWithManaged.PartiallyApplied
 
