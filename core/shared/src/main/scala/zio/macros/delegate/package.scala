@@ -27,6 +27,17 @@ package object delegate {
     f => old => ev.mix(old, f(old))
 
   /**
+   * Generates a function that can be used to add a trait implementation to an existing instance.
+   */
+  def extend[A](a: A): Extend[A] = new Extend(a)
+
+  /**
+   * Creates an Eliminate that can be used to remove requirements from ZIO's environment.
+   */
+  def eliminate[A](a: A): Eliminate[A] =
+    new Eliminate(extend(a))
+
+  /**
    * Create a function that can be used to enrich ZIO or ZManaged with the mixed in trait instance.
    */
   def enrichWith[A](a: A): EnrichWith[A] = new EnrichWith(a)
