@@ -55,8 +55,22 @@ private[macros] class Macros(val c: Context) {
 
     // aT may extend a class
     //bT may not as it will be mixed in
-    preconditions(
+    check(
       (!aTT.typeSymbol.isFinal -> s"${aTT.typeSymbol.toString()} must be nonfinal class or trait.") ::
+        aTTComps
+          .filterNot(_.typeSymbol.asClass.isTrait)
+          .map(
+            t =>
+              t.decls
+                .filter(
+                  s =>
+                    s.isMethod && {
+                      val m = s.asMethod
+                      m.isConstructor && m.paramLists.flatten.isEmpty
+                    }
+                )
+                .nonEmpty -> s"${t.typeSymbol.toString()} needs to have an no-arg constructor."
+          ) ++
         bTTComps.map(t => t.typeSymbol.asClass.isTrait -> s"${t.typeSymbol.toString()} needs to be a trait."): _*
     )
 
@@ -172,7 +186,7 @@ private[macros] class Macros(val c: Context) {
 
     annottees.map(_.tree) match {
       case (valDecl: ValDef) :: (classDecl: ClassDef) :: Nil =>
-        preconditions(
+        check(
           (classDecl.tparams.isEmpty) -> "Classes with generic parameters are not currently supported."
         )
         val modified = modifiedClass(classDecl, valDecl)
@@ -259,7 +273,7 @@ private[macros] class Macros(val c: Context) {
   final private[this] def abort(s: String) =
     c.abort(c.enclosingPosition, s)
 
-  final private[this] def preconditions(conds: (Boolean, String)*): Unit =
+  final private[this] def check(conds: (Boolean, String)*): Unit =
     conds.foreach {
       case (cond, s) =>
         if (!cond) abort(s)
