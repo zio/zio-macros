@@ -32,7 +32,7 @@ object EnrichWithExample {
   val enrichBlocking          = enrichWith[Blocking](Blocking.Live)
   val enrichBlockingMWithDeps = enrichWithM[Blocking](blockingWithDeps)
 
-  ZIO.succeed(new DefaultRuntime {}.Environment) @@
+  ZIO.succeed(new DefaultRuntime {}.environment) @@
     enrichClock @@
     enrichClock @@
     enrichClockM @@
