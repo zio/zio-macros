@@ -118,7 +118,6 @@ private[macros] class Macros(val c: Context) {
 
   @silent("pattern var [^\\s]+ in method unapply is never used")
   def delegateImpl(annottees: c.Expr[Any]*): c.Tree = {
-
     case class Arguments(verbose: Boolean, forwardObjectMethods: Boolean, generateTraits: Boolean)
 
     val args: Arguments = c.prefix.tree match {

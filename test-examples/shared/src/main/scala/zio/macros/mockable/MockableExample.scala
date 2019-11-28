@@ -22,14 +22,12 @@ import zio.test.mock.Expectation.{ unit, value }
 
 @mockable
 trait Module {
-
   val module: Module.Service[Any]
 }
 
 object Module {
 
   trait Service[R] {
-
     def get(id: Int): ZIO[R, Nothing, String]
     def set(id: Int, value: String): ZIO[R, Nothing, Unit]
     def getAndSet(id: Int, value: String): ZIO[R, Nothing, String]

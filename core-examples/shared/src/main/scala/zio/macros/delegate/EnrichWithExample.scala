@@ -22,7 +22,6 @@ import zio.blocking.Blocking
 import zio.console.Console
 
 object EnrichWithExample {
-
   val blockingWithDeps: ZIO[Console, Throwable, Blocking] = ZIO.succeed(Blocking.Live)
 
   val enrichClock        = enrichWith[Clock](Clock.Live)
