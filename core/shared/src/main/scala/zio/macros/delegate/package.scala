@@ -16,8 +16,6 @@
 
 package zio.macros
 
-import zio._
-
 package object delegate {
 
   /**
@@ -41,33 +39,4 @@ package object delegate {
    */
   def enrichWithManaged[A]: EnrichWithManaged.PartiallyApplied[A] = new EnrichWithManaged.PartiallyApplied
 
-  implicit class ZIOSyntax[R, E, A](zio: ZIO[R, E, A]) {
-
-    def providePart[R1]: ProvidePartZIO[R1, R, E, A] =
-      new ProvidePartZIO(zio)
-
-    def @@[B](enrichWith: EnrichWith[B])(implicit ev: A Mix B): ZIO[R, E, A with B] =
-      enrichWith.enrichZIO[R, E, A](zio)
-
-    def @@[B](enrichWithM: EnrichWithM[A, E, B])(implicit ev: A Mix B): ZIO[R, E, A with B] =
-      enrichWithM.enrichZIO[R, E, A](zio)
-
-    def @@[B](enrichWithManaged: EnrichWithManaged[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
-      enrichWithManaged.enrichZManaged[R, E, A](zio.toManaged_)
-  }
-
-  implicit class ZManagedSyntax[R, E, A](zManaged: ZManaged[R, E, A]) {
-
-    def providePart[R1]: ProvidePartZManaged[R1, R, E, A] =
-      new ProvidePartZManaged(zManaged)
-
-    def @@[B](enrichWith: EnrichWith[B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
-      enrichWith.enrichZManaged[R, E, A](zManaged)
-
-    def @@[B](enrichWithM: EnrichWithM[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
-      enrichWithM.enrichZManaged[R, E, A](zManaged)
-
-    def @@[B](enrichWithManaged: EnrichWithManaged[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
-      enrichWithManaged.enrichZManaged[R, E, A](zManaged)
-  }
 }

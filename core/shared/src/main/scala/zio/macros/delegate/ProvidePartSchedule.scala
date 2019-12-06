@@ -18,10 +18,10 @@ package zio.macros.delegate
 
 import zio._
 
-final class ProvidePartZSchedule[R1, R, E, A](zSchedule: ZSchedule[R, E, A]) {
+final class ProvidePartSchedule[R1, R, E, A](schedule: Schedule[R, E, A]) {
 
-  def apply[R2, R3 >: R2 with R1 <: R](r1: R1)(implicit ev: R2 Mix R1): ZSchedule[R2, E, A] =
-    zSchedule.provideSome[R2] { r =>
+  def apply[R2, R3 >: R2 with R1 <: R](r1: R1)(implicit ev: R2 Mix R1): Schedule[R2, E, A] =
+    schedule.provideSome[R2] { r =>
       val r3: R3 = enrichWith[R1](r1)[R2](r)(ev)
       r3
     }

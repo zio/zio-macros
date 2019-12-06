@@ -20,6 +20,7 @@ import zio._
 import zio.clock.Clock
 import zio.blocking.Blocking
 import zio.console.Console
+import zio.macros.delegate.syntax._
 
 object EnrichWithExample {
 
@@ -32,7 +33,7 @@ object EnrichWithExample {
   val enrichBlocking          = enrichWith[Blocking](Blocking.Live)
   val enrichBlockingMWithDeps = enrichWithM[Blocking](blockingWithDeps)
 
-  ZIO.succeed(new DefaultRuntime {}.Environment) @@
+  ZIO.succeed(new DefaultRuntime {}.environment) @@
     enrichClock @@
     enrichClock @@
     enrichClockM @@

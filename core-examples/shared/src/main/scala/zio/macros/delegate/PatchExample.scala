@@ -15,11 +15,12 @@
  */
 package zio.macros.delegate
 
-import zio.ZEnv
+import zio._
 import zio.clock.Clock
 
 object PatchExample {
 
   val mapClock: (Clock.Service[Any] => Clock.Service[Any]) => ZEnv => ZEnv =
     f => patch[ZEnv, Clock].apply(c => new Clock { val clock = f(c.clock) })
+
 }

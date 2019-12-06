@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 
-/*
- * Copyright 2017-2019 John A. De Goes and the ZIO Contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package zio.macros.delegate
 
 import zio._
+import zio.macros.delegate.syntax._
 import zio.clock.Clock
 import zio.blocking.Blocking
 
@@ -43,6 +29,6 @@ object EliminateExample {
   val zManaged: ZManaged[Clock with Blocking, Nothing, Unit] = ZManaged.unit
   val zManagedEliminated: ZManaged[Blocking, Nothing, Unit]  = zManaged.providePart[Clock](Clock.Live)
 
-  // val zSchedule: ZSchedule[Clock with Blocking, Any, Unit] = Schedule.stop
-  // val zScheduleEliminated: ZSchedule[Blocking, Any, Unit]  = zSchedule.providePart[Clock](Clock.Live)
+  val schedule: Schedule[Clock with Blocking, Any, Unit] = Schedule.stop
+  val scheduleEliminated: Schedule[Blocking, Any, Unit]  = schedule.providePart[Clock](Clock.Live)
 }
