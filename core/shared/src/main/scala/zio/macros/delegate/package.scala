@@ -27,12 +27,6 @@ package object delegate {
     f => old => ev.mix(old, f(old))
 
   /**
-   * Creates an object that can be used to partially provide ZIO's environment.
-   */
-  def eliminate[A](a: A): Eliminate[A] =
-    new Eliminate(enrichWith(a))
-
-  /**
    * Create an object that can be used to extend an instance with a trait implementation.
    */
   def enrichWith[A](a: A): EnrichWith[A] = new EnrichWith(a)
@@ -49,6 +43,9 @@ package object delegate {
 
   implicit class ZIOSyntax[R, E, A](zio: ZIO[R, E, A]) {
 
+    def providePart[R1]: ProvidePartZIO[R1, R, E, A] =
+      new ProvidePartZIO(zio)
+
     def @@[B](enrichWith: EnrichWith[B])(implicit ev: A Mix B): ZIO[R, E, A with B] =
       enrichWith.enrichZIO[R, E, A](zio)
 
@@ -60,6 +57,9 @@ package object delegate {
   }
 
   implicit class ZManagedSyntax[R, E, A](zManaged: ZManaged[R, E, A]) {
+
+    def providePart[R1]: ProvidePartZManaged[R1, R, E, A] =
+      new ProvidePartZManaged(zManaged)
 
     def @@[B](enrichWith: EnrichWith[B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
       enrichWith.enrichZManaged[R, E, A](zManaged)

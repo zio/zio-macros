@@ -38,11 +38,11 @@ import zio.blocking.Blocking
 object EliminateExample {
 
   val zio: ZIO[Clock with Blocking, Nothing, Unit] = ZIO.unit
-  val zioEliminated: ZIO[Blocking, Nothing, Unit]  = eliminate[Clock](Clock.Live)(zio)
+  val zioEliminated: ZIO[Blocking, Nothing, Unit]  = zio.providePart[Clock](Clock.Live)
 
   val zManaged: ZManaged[Clock with Blocking, Nothing, Unit] = ZManaged.unit
-  val zManagedEliminated: ZManaged[Blocking, Nothing, Unit]  = eliminate[Clock](Clock.Live)(zManaged)
+  val zManagedEliminated: ZManaged[Blocking, Nothing, Unit]  = zManaged.providePart[Clock](Clock.Live)
 
-  val zSchedule: ZSchedule[Clock with Blocking, Any, Unit] = Schedule.stop
-  val zScheduleEliminated: ZSchedule[Blocking, Any, Unit]  = eliminate[Clock](Clock.Live)(zSchedule)
+  // val zSchedule: ZSchedule[Clock with Blocking, Any, Unit] = Schedule.stop
+  // val zScheduleEliminated: ZSchedule[Blocking, Any, Unit]  = zSchedule.providePart[Clock](Clock.Live)
 }

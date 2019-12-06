@@ -18,15 +18,12 @@ package zio.macros.delegate
 
 import zio._
 
-final class Eliminate[R](ext: EnrichWith[R]) {
+final class ProvidePartZSchedule[R1, R, E, A](zSchedule: ZSchedule[R, E, A]) {
 
-  def apply[R1, R2 >: R with R1, E, A](zio: ZIO[R2, E, A])(implicit ev: R1 Mix R): ZIO[R1, E, A] =
-    zio.provideSome(r => ext[R1](r))
-
-  def apply[R1, R2 >: R with R1, E, A](zManaged: ZManaged[R2, E, A])(implicit ev: R1 Mix R): ZManaged[R1, E, A] =
-    zManaged.provideSome(r => ext[R1](r))
-
-  def apply[R1, R2 >: R with R1, E, A](schedule: ZSchedule[R2, E, A])(implicit ev: R1 Mix R): ZSchedule[R1, E, A] =
-    schedule.provideSome(r => ext[R1](r))
+  def apply[R2, R3 >: R2 with R1 <: R](r1: R1)(implicit ev: R2 Mix R1): ZSchedule[R2, E, A] =
+    zSchedule.provideSome[R2] { r =>
+      val r3: R3 = enrichWith[R1](r1)[R2](r)(ev)
+      r3
+    }
 
 }
