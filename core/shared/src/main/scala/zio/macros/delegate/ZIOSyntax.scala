@@ -6,6 +6,9 @@ trait ZIOSyntax {
 
   implicit class ZIOOps[R, E, A](zio: ZIO[R, E, A]) {
 
+    def providePart[R1]: ProvidePartZIO[R1, R, E, A] =
+      new ProvidePartZIO(zio)
+
     def @@[B](enrichWith: EnrichWith[B])(implicit ev: A Mix B): ZIO[R, E, A with B] =
       enrichWith.enrichZIO[R, E, A](zio)
 

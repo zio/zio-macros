@@ -17,21 +17,18 @@
 package zio.macros.delegate
 
 import zio._
+import zio.macros.delegate.syntax._
+import zio.clock.Clock
+import zio.blocking.Blocking
 
-final class EnrichWithM[-R, +E, B](private[this] val zio: ZIO[R, E, B]) {
+object EliminateExample {
 
-  def apply[A](a: A)(implicit ev: A Mix B): ZIO[R, E, A with B] =
-    zio.map(ev.mix(a, _))
+  val zio: ZIO[Clock with Blocking, Nothing, Unit] = ZIO.unit
+  val zioEliminated: ZIO[Blocking, Nothing, Unit]  = zio.providePart[Clock](Clock.Live)
 
-  def enrichZIO[R1, E1 >: E, A <: R](that: ZIO[R1, E1, A])(implicit ev: A Mix B): ZIO[R1, E1, A with B] =
-    that.flatMap(r1 => zio.provide(r1).map(ev.mix(r1, _)))
+  val zManaged: ZManaged[Clock with Blocking, Nothing, Unit] = ZManaged.unit
+  val zManagedEliminated: ZManaged[Blocking, Nothing, Unit]  = zManaged.providePart[Clock](Clock.Live)
 
-  def enrichZManaged[R1, E1 >: E, A <: R](that: ZManaged[R1, E1, A])(implicit ev: A Mix B): ZManaged[R1, E1, A with B] =
-    that.flatMap(r1 => zio.provide(r1).map(ev.mix(r1, _)).toManaged_)
-}
-
-object EnrichWithM {
-  final class PartiallyApplied[A] {
-    def apply[R, E](zio: ZIO[R, E, A]): EnrichWithM[R, E, A] = new EnrichWithM(zio)
-  }
+  val schedule: Schedule[Clock with Blocking, Any, Unit] = Schedule.stop
+  val scheduleEliminated: Schedule[Blocking, Any, Unit]  = schedule.providePart[Clock](Clock.Live)
 }

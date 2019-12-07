@@ -20,6 +20,9 @@ import zio._
 
 final class EnrichWith[B](private[this] val b: B) {
 
+  def apply[A](a: A)(implicit ev: A Mix B): A with B =
+    ev.mix(a, b)
+
   def enrichZIO[R, E, A](zio: ZIO[R, E, A])(implicit ev: A Mix B): ZIO[R, E, A with B] = zio.map(ev.mix(_, b))
 
   def enrichZManaged[R, E, A](zManaged: ZManaged[R, E, A])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
