@@ -18,13 +18,19 @@ package zio.macros.delegate
 
 import zio._
 
-final class EnrichWith[B](private[this] val b: B) {
+final class EnrichWith[B](val value: B) {
 
   def apply[A](a: A)(implicit ev: A Mix B): A with B =
-    ev.mix(a, b)
+    ev.mix(a, value)
 
-  def enrichZIO[R, E, A](zio: ZIO[R, E, A])(implicit ev: A Mix B): ZIO[R, E, A with B] = zio.map(ev.mix(_, b))
+  def enrichZIO[R, E, A](zio: ZIO[R, E, A])(implicit ev: A Mix B): ZIO[R, E, A with B] = zio.map(ev.mix(_, value))
 
   def enrichZManaged[R, E, A](zManaged: ZManaged[R, E, A])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
-    zManaged.map(ev.mix(_, b))
+    zManaged.map(ev.mix(_, value))
+
+  val toEnrichWithM: EnrichWithM[Any, Nothing, B] =
+    new EnrichWithM(ZIO.succeed(value))
+
+  val toEnrichWithManaged: EnrichWithManaged[Any, Nothing, B] =
+    new EnrichWithManaged(ZManaged.succeed(value))
 }
