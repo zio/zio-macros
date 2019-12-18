@@ -18,7 +18,7 @@ package zio.macros.delegate
 
 import zio._
 
-final class EnrichWithManaged[-R, +E, B](private[this] val zManaged: ZManaged[R, E, B]) {
+final class EnrichWithManaged[-R, +E, B](val zManaged: ZManaged[R, E, B]) {
 
   def apply[A](a: A)(implicit ev: A Mix B): ZManaged[R, E, A with B] =
     zManaged.map(ev.mix(a, _))
@@ -31,6 +31,10 @@ final class EnrichWithManaged[-R, +E, B](private[this] val zManaged: ZManaged[R,
 }
 
 object EnrichWithManaged {
+
+  def unwrap[R, E, B](zManaged: ZManaged[R, E, EnrichWithManaged[R, E, B]]): EnrichWithManaged[R, E, B] =
+    new EnrichWithManaged(zManaged.flatMap(_.zManaged))
+
   final class PartiallyApplied[A] {
     def apply[R, E](zManaged: ZManaged[R, E, A]): EnrichWithManaged[R, E, A] = new EnrichWithManaged(zManaged)
   }
