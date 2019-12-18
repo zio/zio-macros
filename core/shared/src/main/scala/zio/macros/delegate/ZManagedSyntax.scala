@@ -12,11 +12,13 @@ trait ZManagedSyntax {
     def @@[B](enrichWith: EnrichWith[B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
       enrichWith.enrichZManaged[R, E, A](zManaged)
 
-    def @@[B](enrichWithM: EnrichWithM[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
-      enrichWithM.enrichZManaged[R, E, A](zManaged)
+    def @@[E1 >: E, B](enrichWithM: EnrichWithM[A, E1, B])(implicit ev: A Mix B): ZManaged[R, E1, A with B] =
+      enrichWithM.enrichZManaged[R, E1, A](zManaged)
 
-    def @@[B](enrichWithManaged: EnrichWithManaged[A, E, B])(implicit ev: A Mix B): ZManaged[R, E, A with B] =
-      enrichWithManaged.enrichZManaged[R, E, A](zManaged)
+    def @@[E1 >: E, B](
+      enrichWithManaged: EnrichWithManaged[A, E1, B]
+    )(implicit ev: A Mix B): ZManaged[R, E1, A with B] =
+      enrichWithManaged.enrichZManaged[R, E1, A](zManaged)
   }
 
 }
