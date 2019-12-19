@@ -59,17 +59,15 @@ private[macros] class Macros(val c: Context) {
       (!aTT.typeSymbol.isFinal -> s"${aTT.typeSymbol.toString()} must be nonfinal class or trait.") ::
         aTTComps
           .filterNot(_.typeSymbol.asClass.isTrait)
-          .map(
-            t =>
-              t.decls
-                .filter(
-                  s =>
-                    s.isMethod && {
-                      val m = s.asMethod
-                      m.isConstructor && m.paramLists.flatten.isEmpty
-                    }
-                )
-                .nonEmpty -> s"${t.typeSymbol.toString()} needs to have an no-arg constructor."
+          .map(t =>
+            t.decls
+              .filter(s =>
+                s.isMethod && {
+                  val m = s.asMethod
+                  m.isConstructor && m.paramLists.flatten.isEmpty
+                }
+              )
+              .nonEmpty -> s"${t.typeSymbol.toString()} needs to have an no-arg constructor."
           ) ++
         bTTComps.map(t => t.typeSymbol.asClass.isTrait -> s"${t.typeSymbol.toString()} needs to be a trait."): _*
     )
@@ -145,13 +143,12 @@ private[macros] class Macros(val c: Context) {
     def modifiedClass(classDecl: ClassDef, delegateTo: ValDef): c.Tree = {
       val q"..$mods class $className(..$fields) extends ..$bases { ..$body }" = classDecl
       val existingMethods = body
-        .flatMap(
-          tree =>
-            tree match {
-              case DefDef(_, n, _, _, _, _) => Some(n)
-              case ValDef(_, n, _, _)       => Some(n)
-              case _                        => None
-            }
+        .flatMap(tree =>
+          tree match {
+            case DefDef(_, n, _, _, _, _) => Some(n)
+            case ValDef(_, n, _, _)       => Some(n)
+            case _                        => None
+          }
         )
         .toSet
 
