@@ -22,28 +22,29 @@ val b: Foo = new Bar(FooImpl)
 
 * Any methods on the resulting type of the defined class that are also defined on the annotated member will be forwarded to the member unless a definition exists in the body of the class.
 ```scala
-import zio.delegate._
+import zio.macros.annotation.delegate
 
 trait Foo {
   def foo: Int
 }
+
 abstract class Foo1 extends Foo {
   def foo = 4
-  def foo1: Int
+  def foo1: Int = ???
 }
 
 class Bar(@delegate f: Foo)
-println(new Bar(new Foo {}).foo) // 4
+println(new Bar(new Foo1 {}).foo) // 4
 
 class Bar1(@delegate f: Foo) {
   def foo = 3
 }
-println(new Bar1(new Foo {}).foo) // 3
+println(new Bar1(new Foo1 {}).foo) // 3
 
 // classes have to be explicitly extended. Forwarders will still
 // be automatically generated though.
-class Bar2(@delegate f: Foo1) exends Foo1
-println(new Bar1(new Foo1 { def foo1 = 3 }).foo1) // 3
+class Bar2(@delegate f: Foo1) extends Foo1
+println(new Bar2(new Foo1 { override def foo1 = 3 }).foo1) // 3
 ```
 
 * The behavior of the annotation can be customized with three options
