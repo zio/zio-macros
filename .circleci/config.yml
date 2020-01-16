@@ -41,7 +41,7 @@ install_jdk: &install_jdk
       elif [ $JDK_VERSION == 8 ]; then
         sudo apt install -y openjdk-8-jdk
       fi
-      java -versiony
+      java -version
 
 load_cache: &load_cache
   - restore_cache:
