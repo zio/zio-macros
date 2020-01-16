@@ -1,5 +1,5 @@
 addSbtPlugin("org.scalameta"      % "sbt-scalafmt"              % "2.3.0")
-addSbtPlugin("com.github.cb372"   % "sbt-explicit-dependencies" % "0.2.11")
+addSbtPlugin("com.github.cb372"   % "sbt-explicit-dependencies" % "0.2.12")
 addSbtPlugin("org.scala-js"       % "sbt-scalajs"               % "0.6.31")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject"  % "0.6.1")
 addSbtPlugin("com.eed3si9n"       % "sbt-buildinfo"             % "0.9.0")
