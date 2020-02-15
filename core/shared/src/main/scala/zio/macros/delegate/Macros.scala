@@ -161,9 +161,7 @@ private[macros] class Macros(val c: Context) {
           val baseTraitsOnly = basesTypes.flatMap(getTraits(_).map(_.toType)).toList
           getTraits(toType)
             .map(_.toType)
-            .filterNot { tpe =>
-              baseTraitsOnly.exists(tpe =:= _)
-            }
+            .filterNot(tpe => baseTraitsOnly.exists(tpe =:= _))
             .toList
         } else Nil
 
