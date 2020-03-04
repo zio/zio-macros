@@ -33,7 +33,7 @@ object AccessibleSpec
               for {
                 makeAccessors <- UIO(() => new Foo.Accessors {})
                 accessors     <- UIO(makeAccessors())
-              } yield assert(accessors, anything)
+              } yield assert(accessors)(anything)
             },
             testM("without parenthesis") {
               @accessible
@@ -43,7 +43,7 @@ object AccessibleSpec
               for {
                 makeAccessors <- UIO(() => new Foo.Accessors {})
                 accessors     <- UIO(makeAccessors())
-              } yield assert(accessors, anything)
+              } yield assert(accessors)(anything)
             }
           ),
           suite("named should generate accessors object")(
@@ -52,14 +52,14 @@ object AccessibleSpec
               trait Foo  { val foo: Foo.Service[Any] }
               object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
 
-              assert(Foo.>, anything)
+              assert(Foo.>)(anything)
             },
             test("proxy") {
               @accessible("proxy")
               trait Foo  { val foo: Foo.Service[Any] }
               object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
 
-              assert(Foo.proxy, anything)
+              assert(Foo.proxy)(anything)
             }
           )
         ),
@@ -69,7 +69,7 @@ object AccessibleSpec
             trait Foo  { val foo: Foo.Service[Any] }
             object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
 
-            assert(Foo.>.a, anything)
+            assert(Foo.>.a)(anything)
           },
           suite("def")(
             suite("no args")(
@@ -78,14 +78,14 @@ object AccessibleSpec
                 trait Foo  { val foo: Foo.Service[Any] }
                 object Foo { trait Service[R] { def a: ZIO[R, Nothing, Unit] } }
 
-                assert(Foo.>.a, anything)
+                assert(Foo.>.a)(anything)
               },
               test("with parenthesis") {
                 @accessible(">")
                 trait Foo  { val foo: Foo.Service[Any] }
                 object Foo { trait Service[R] { def a(): ZIO[R, Nothing, Unit] } }
 
-                assert(Foo.>.a(), anything)
+                assert(Foo.>.a())(anything)
               }
             ),
             test("single argument") {
@@ -93,7 +93,7 @@ object AccessibleSpec
               trait Foo  { val foo: Foo.Service[Any] }
               object Foo { trait Service[R] { def a(v1: Int): ZIO[R, Nothing, Unit] } }
 
-              assert(Foo.>.a(1), anything)
+              assert(Foo.>.a(1))(anything)
             },
             suite("multiple arguments")(
               test("single parameter list") {
@@ -101,14 +101,14 @@ object AccessibleSpec
                 trait Foo  { val foo: Foo.Service[Any] }
                 object Foo { trait Service[R] { def a(v1: Int, v2: Int): ZIO[R, Nothing, Unit] } }
 
-                assert(Foo.>.a(1, 2), anything)
+                assert(Foo.>.a(1, 2))(anything)
               },
               test("multiple parameter lists") {
                 @accessible(">")
                 trait Foo  { val foo: Foo.Service[Any] }
                 object Foo { trait Service[R] { def a(v1: Int)(v2: Int): ZIO[R, Nothing, Unit] } }
 
-                assert(Foo.>.a(1)(2), anything)
+                assert(Foo.>.a(1)(2))(anything)
               }
             ),
             test("overloaded") {
@@ -121,7 +121,7 @@ object AccessibleSpec
                 }
               }
 
-              assert(Foo.>.a(1), anything) && assert(Foo.>.a(1L), anything)
+              assert(Foo.>.a(1))(anything) && assert(Foo.>.a(1L))(anything)
             },
             suite("zio aliases")(
               test("RIO") {
@@ -129,14 +129,14 @@ object AccessibleSpec
                 trait Foo  { val foo: Foo.Service[Any] }
                 object Foo { trait Service[R] { val a: RIO[R, Unit] } }
 
-                assert(Foo.>.a, anything)
+                assert(Foo.>.a)(anything)
               },
               test("URIO") {
                 @accessible(">")
                 trait Foo  { val foo: Foo.Service[Any] }
                 object Foo { trait Service[R] { val a: URIO[R, Unit] } }
 
-                assert(Foo.>.a, anything)
+                assert(Foo.>.a)(anything)
               }
             ),
             test("non abstract methods") {
@@ -144,7 +144,7 @@ object AccessibleSpec
               trait Foo  { val foo: Foo.Service[Any] }
               object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] = ZIO.unit } }
 
-              assert(Foo.>.a, anything)
+              assert(Foo.>.a)(anything)
             }
           )
         ),
@@ -157,7 +157,7 @@ object AccessibleSpec
             val postValue: Int = 42
           }
 
-          assert(Foo.preValue, equalTo(42)) && assert(Foo.postValue, equalTo(42))
+          assert(Foo.preValue)(equalTo(42)) && assert(Foo.postValue)(equalTo(42))
         }
       )
     )

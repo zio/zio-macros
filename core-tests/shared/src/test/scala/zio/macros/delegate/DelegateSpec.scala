@@ -55,7 +55,7 @@ object DelegateSuite {
                 class Bar(@delegate foo: Foo)
                 new Bar(inner)
               }
-    } yield assert(outer.a, equalTo(3))
+    } yield assert(outer.a)(equalTo(3))
   }
 
   val e2 = {
@@ -71,7 +71,7 @@ object DelegateSuite {
                 }
                 new Bar(inner)
               }
-    } yield assert(outer.a, equalTo(4))
+    } yield assert(outer.a)(equalTo(4))
   }
 
   val e3 = {
@@ -85,7 +85,7 @@ object DelegateSuite {
                 class Bar(@delegate foo: Foo) extends Foo
                 new Bar(inner)
               }
-    } yield assert(outer.a, equalTo(3))
+    } yield assert(outer.a)(equalTo(3))
   }
 
   val e4 = {
@@ -101,7 +101,7 @@ object DelegateSuite {
                 class Bar(@delegate foo: Foo) extends Foo
                 new Bar(inner)
               }
-    } yield assert(outer.a, equalTo(3))
+    } yield assert(outer.a)(equalTo(3))
   }
 
   val e5 = {
@@ -117,7 +117,7 @@ object DelegateSuite {
                 }
                 new Bar(inner)
               }
-    } yield assert(outer.a(""), equalTo("bar")) && assert(outer.a(0), equalTo(3))
+    } yield assert(outer.a(""))(equalTo("bar")) && assert(outer.a(0))(equalTo(3))
   }
 
   val e6 = {
@@ -134,7 +134,7 @@ object DelegateSuite {
                 class Bar(@delegate foo: Foo1)
                 new Bar(inner)
               }
-    } yield assert(outer.a(""), equalTo("bar")) && assert(outer.a(0), equalTo(3))
+    } yield assert(outer.a(""))(equalTo("bar")) && assert(outer.a(0))(equalTo(3))
   }
 
   val e7 = {
@@ -151,7 +151,7 @@ object DelegateSuite {
                 class Baz(@delegate bar: Bar)
                 new Baz(inner)
               }
-    } yield assert(outer.a, equalTo(1))
+    } yield assert(outer.a)(equalTo(1))
   }
 
   /*

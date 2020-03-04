@@ -51,7 +51,7 @@ object MixSuite {
       left  <- UIO(new Foo {})
       right <- UIO(new Bar {})
       mixed <- UIO(Mix[Foo, Bar].mix(left, right))
-    } yield assert(mixed.a, equalTo(1)) && assert(mixed.b, equalTo(2))
+    } yield assert(mixed.a)(equalTo(1)) && assert(mixed.b)(equalTo(2))
   }
 
   val e2 = {
@@ -66,7 +66,7 @@ object MixSuite {
       left  <- UIO(new Foo {})
       right <- UIO(new Bar {})
       mixed <- UIO(Mix[Foo, Bar].mix(left, right))
-    } yield assert(mixed.a, equalTo(2))
+    } yield assert(mixed.a)(equalTo(2))
   }
 
   val e3 = {
@@ -81,7 +81,7 @@ object MixSuite {
       left  <- UIO(new Foo())
       right <- UIO(new Bar {})
       mixed <- UIO(Mix[Foo, Bar].mix(left, right))
-    } yield assert(mixed.a, equalTo(1)) && assert(mixed.b, equalTo(2))
+    } yield assert(mixed.a)(equalTo(1)) && assert(mixed.b)(equalTo(2))
   }
 
   val e4 = {
@@ -100,7 +100,7 @@ object MixSuite {
                 def a(a: String) = "foo"
               })
       mixed <- UIO(Mix[Foo, Bar].mix(left, right))
-    } yield assert(mixed.a(1), equalTo(1)) && assert(mixed.a(""), equalTo("foo"))
+    } yield assert(mixed.a(1))(equalTo(1)) && assert(mixed.a(""))(equalTo("foo"))
   }
 
   val e5 = {
@@ -120,7 +120,7 @@ object MixSuite {
              })
       right <- UIO(new Baz {})
       mixed <- UIO(Mix[FooBar, Baz].mix(left, right))
-    } yield assert(mixed.a(1), equalTo(2)) && assert(mixed.a(""), equalTo("foo"))
+    } yield assert(mixed.a(1))(equalTo(2)) && assert(mixed.a(""))(equalTo("foo"))
   }
 
   val e6 = {
@@ -140,7 +140,7 @@ object MixSuite {
                 def a(a: String) = "foo"
               })
       mixed <- UIO(Mix[Baz, FooBar].mix(left, right))
-    } yield assert(mixed.a(1), equalTo(2)) && assert(mixed.a(""), equalTo("foo"))
+    } yield assert(mixed.a(1))(equalTo(2)) && assert(mixed.a(""))(equalTo("foo"))
   }
 
   val e7 = {
@@ -160,7 +160,7 @@ object MixSuite {
                 def b(a: String) = "foo"
               })
       mixed <- UIO(Mix[Baz, FooBar].mix(left, right))
-    } yield assert(mixed.a(1), equalTo(2)) && assert(mixed.b(""), equalTo("foo"))
+    } yield assert(mixed.a(1))(equalTo(2)) && assert(mixed.b(""))(equalTo("foo"))
   }
 
   val e8 = {
@@ -175,6 +175,6 @@ object MixSuite {
                 override def a = 2
               })
       mixed <- UIO(Mix[Foo with Bar, Foo].mix(left, right))
-    } yield assert(mixed.a, equalTo(2))
+    } yield assert(mixed.a)(equalTo(2))
   }
 }
