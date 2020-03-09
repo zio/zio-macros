@@ -14,8 +14,6 @@ learn more about the ones that interest you.
 
 - [accessible](docs/accessible.md) - Generate public accessors for ZIO services.
 - [mockable](docs/mockable.md) - Automatically derive mockable implementations for your services.
-- [delegate](docs/delegate.md) - Generate proxies for arbitrary traits / classes.
-- [mix](docs/mix.md) - Derive rules to combine instances of traits into a compound type.
 
 ## Installation
 
