@@ -7,7 +7,7 @@ import sbtbuildinfo._
 import BuildInfoKeys._
 
 object BuildHelper {
-  val zioVersion = "1.0.0-RC17"
+  val zioVersion = "1.0.0-RC18-2"
 
   private val testDeps = Seq(
     "dev.zio" %% "zio-test"     % zioVersion % "test",

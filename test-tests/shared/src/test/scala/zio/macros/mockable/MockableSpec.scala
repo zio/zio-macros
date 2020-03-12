@@ -57,7 +57,7 @@ object MockableSuite {
     trait Foo  { val foo: Foo.Service[Any] }
     object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] } }
 
-    assert(Foo.a, anything)
+    assert(Foo.a)(anything)
   }
 
   val e2 = {
@@ -65,7 +65,7 @@ object MockableSuite {
     trait Foo  { val foo: Foo.Service[Any] }
     object Foo { trait Service[R] { def a: ZIO[R, Nothing, Unit] } }
 
-    assert(Foo.a, isSubtype[Method[Foo, Unit, Unit]](anything))
+    assert(Foo.a)(isSubtype[Method[Foo, Unit, Unit]](anything))
   }
 
   val e3 = {
@@ -73,7 +73,7 @@ object MockableSuite {
     trait Foo  { val foo: Foo.Service[Any] }
     object Foo { trait Service[R] { def a(): ZIO[R, Nothing, Unit] } }
 
-    assert(Foo.a, isSubtype[Method[Foo, Unit, Unit]](anything))
+    assert(Foo.a)(isSubtype[Method[Foo, Unit, Unit]](anything))
   }
 
   val e4 = {
@@ -81,14 +81,14 @@ object MockableSuite {
     trait Foo  { val foo: Foo.Service[Any] }
     object Foo { trait Service[R] { def a(v1: Int): ZIO[R, Nothing, Unit] } }
 
-    assert(Foo.a, isSubtype[Method[Foo, Int, Unit]](anything))
+    assert(Foo.a)(isSubtype[Method[Foo, Int, Unit]](anything))
   }
 
   val e5 = {
     @mockable
     trait Foo  { val foo: Foo.Service[Any] }
     object Foo { trait Service[R] { def a(v1: Int, v2: Int): ZIO[R, Nothing, Unit] } }
-    assert(Foo.a, isSubtype[Method[Foo, (Int, Int), Unit]](anything))
+    assert(Foo.a)(isSubtype[Method[Foo, (Int, Int), Unit]](anything))
   }
 
   val e6 = {
@@ -96,7 +96,7 @@ object MockableSuite {
     trait Foo  { val foo: Foo.Service[Any] }
     object Foo { trait Service[R] { def a(v1: Int)(v2: Int): ZIO[R, Nothing, Unit] } }
 
-    assert(Foo.a, isSubtype[Method[Foo, (Int, Int), Unit]](anything))
+    assert(Foo.a)(isSubtype[Method[Foo, (Int, Int), Unit]](anything))
   }
 
   val e7 = {
@@ -109,10 +109,7 @@ object MockableSuite {
       }
     }
 
-    assert(Foo.a._0, isSubtype[Method[Foo, Int, Unit]](anything)) && assert(
-      Foo.a._1,
-      isSubtype[Method[Foo, Long, Unit]](anything)
-    )
+    assert(Foo.a._0)(isSubtype[Method[Foo, Int, Unit]](anything)) && assert(Foo.a._1)(isSubtype[Method[Foo, Long, Unit]](anything))
   }
 
   val e8 = {
@@ -120,7 +117,7 @@ object MockableSuite {
     trait Foo  { val foo: Foo.Service[Any] }
     object Foo { trait Service[R] { val a: RIO[R, Unit] } }
 
-    assert(Foo.a, isSubtype[Method[Foo, Unit, Unit]](anything))
+    assert(Foo.a)(isSubtype[Method[Foo, Unit, Unit]](anything))
   }
 
   val e9 = {
@@ -128,7 +125,7 @@ object MockableSuite {
     trait Foo  { val foo: Foo.Service[Any] }
     object Foo { trait Service[R] { val a: URIO[R, Unit] } }
 
-    assert(Foo.a, isSubtype[Method[Foo, Unit, Unit]](anything))
+    assert(Foo.a)(isSubtype[Method[Foo, Unit, Unit]](anything))
   }
 
   val e10 = {
@@ -136,7 +133,7 @@ object MockableSuite {
     trait Foo  { val foo: Foo.Service[Any] }
     object Foo { trait Service[R] { val a: ZIO[R, Nothing, Unit] = ZIO.unit } }
 
-    assert(Foo.a, isSubtype[Method[Foo, Unit, Unit]](anything))
+    assert(Foo.a)(isSubtype[Method[Foo, Unit, Unit]](anything))
   }
 
   val e11 = {
@@ -149,6 +146,6 @@ object MockableSuite {
       val postValue: Int = 42
     }
 
-    assert(Foo11.preValue, equalTo(42)) && assert(Foo11.postValue, equalTo(42))
+    assert(Foo11.preValue)(equalTo(42)) && assert(Foo11.postValue)(equalTo(42))
   }
 }
