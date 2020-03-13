@@ -4,6 +4,10 @@
 | --- | --- | --- | --- |
 | [![Build Status][badge-ci]][link-ci] | [![Release Artifacts][badge-sonatype]][link-sonatype] | [![Average time to resolve an issue][badge-iim]][link-iim] | [![badge-discord]][link-discord] |
 
+---
+## Zio-macros has been moved into [ZIO Core](https://github.com/zio/zio). This repo will no longer be maintained.
+---
+
 Scrap boilerplate in your ZIO projects.
 Learn more about ZIO at:
 
